@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1024, height=600">
+  <title>Snap-Cut HMI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #070B12;
+      --surface:   #0D1420;
+      --elevated:  #131D2E;
+      --border:    #1A2D40;
+      --border-hi: #243D55;
+
+      --text:   #D8E4F0;
+      --text-2: #6B82A0;
+      --text-3: #3A4E62;
+
+      --cyan:       #00C8F0;
+      --cyan-dim:   rgba(0,200,240,0.12);
+      --green:      #1EBA55;
+      --green-dim:  rgba(30,186,85,0.12);
+      --amber:      #F0A800;
+      --amber-dim:  rgba(240,168,0,0.12);
+      --red:        #E83838;
+      --red-dim:    rgba(232,56,56,0.12);
+      --blue:       #3B82F6;
+
+      --font-mono: 'Share Tech Mono', monospace;
+      --font:      'Rajdhani', sans-serif;
+    }
+
+    /* ══ LIGHT THEME ════════════════════════════════════════════ */
+    html.light {
+      --bg:        #E8EAED;
+      --surface:   #F2F4F7;
+      --elevated:  #FFFFFF;
+      --border:    #C8CDD5;
+      --border-hi: #A0AABB;
+      --text:      #1A2332;
+      --text-2:    #3A4A5C;
+      --text-3:    #7A8A9A;
+      --cyan:      #0074A8;
+      --cyan-dim:  rgba(0,116,168,0.10);
+      --green:     #1A7A3A;
+      --green-dim: rgba(26,122,58,0.10);
+      --amber:     #8A6000;
+      --amber-dim: rgba(138,96,0,0.12);
+      --red:       #B81818;
+      --red-dim:   rgba(184,24,24,0.10);
+      --blue:      #1A5FA8;
+    }
+
+    /* Body & frame */
+    html.light body       { background: #D0D4DA; }
+    html.light .hmi-frame { border-color: #B0B8C4; box-shadow: 0 4px 24px rgba(0,0,0,0.18); }
+
+    /* Nav bar — hardcoded dark override */
+    html.light .nav-bar         { background: #E0E4EA; border-right-color: var(--border); }
+    html.light .nav-item        { color: var(--text-3); }
+    html.light .nav-item:hover  { background: rgba(0,0,0,0.04); color: var(--text-2); }
+    html.light .nav-item.active { color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,116,168,0.06); }
+
+    /* Top bar */
+    html.light .top-clock { color: var(--text-3); }
+    html.light .safety.ok  { color: #166534; }
+    html.light .safety.estop-off { color: #166534; }
+    html.light .safety.estop-on  { color: #991B1B; }
+
+    /* State pill labels (hardcoded light colors) */
+    html.light .state-pill.idle  .state-label { color: #1A5FA8; }
+    html.light .state-pill.fault .state-label { color: #991B1B; }
+    html.light .state-pill.estop .state-label { color: #991B1B; }
+
+    /* Unit status labels */
+    html.light .u-status.ready  { color: #1A5FA8; }
+    html.light .u-status.fault  { color: #991B1B; }
+
+    /* Status dot glow: toned down on light */
+    html.light .u-dot.cutting { box-shadow: 0 0 5px var(--green); }
+    html.light .u-dot.ready   { box-shadow: 0 0 4px var(--blue); }
+
+    /* Rate number: no glow */
+    html.light .rate-number   { text-shadow: none; }
+    html.light .rate-panel-num { text-shadow: none; }
+    html.light .rate-bar-fill  { box-shadow: none; }
+
+    /* Unit col ambient glow */
+    html.light .unit-col.cutting::before { background: radial-gradient(circle, rgba(26,122,58,0.07) 0%, transparent 65%); }
+    html.light .unit-col.ready::before   { background: radial-gradient(circle, rgba(26,95,168,0.05) 0%, transparent 65%); }
+    html.light .unit-col.fault::before   { background: radial-gradient(circle, rgba(184,24,24,0.07) 0%, transparent 65%); }
+    html.light .unit-col::after          { background-image: radial-gradient(circle, rgba(0,0,0,0.035) 1px, transparent 1px); }
+
+    /* Sensor banner */
+    html.light .sensor-banner { background: #FEF3C7; border-bottom-color: rgba(138,96,0,0.35); }
+
+    /* E-stop banner — hardcoded dark bg override */
+    html.light .estop-banner { background: #FEE2E2; border-bottom-color: var(--red); color: #991B1B; }
+
+    /* Inline fault — light mode */
+    html.light .uc-fault-msg { color: #991B1B; }
+    html.light .uc-fault-ack { color: #991B1B; border-color: var(--red); }
+
+    /* Action bar buttons */
+    html.light .btn-stop   { color: #991B1B; }
+    html.light .btn-start  { color: #166534; box-shadow: none; }
+    html.light .btn-resume { color: #1A5FA8; box-shadow: none; }
+    html.light .btn-ack    { color: #991B1B; }
+
+    /* Manual screen cut button */
+    html.light .btn-cut { box-shadow: none; }
+
+    /* Modal backdrop */
+    html.light .modal-backdrop { background: rgba(200,210,220,0.85); }
+    html.light .modal          { box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+
+    html { background: #030508; }
+    body {
+      background: #030508;
+      color: var(--text);
+      font-family: var(--font);
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 24px;
+    }
+
+    .hmi-frame {
+      width: 1024px; height: 600px;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 1px solid #111;
+    }
+
+    .layout { display: flex; flex-direction: column; height: 100%; background: var(--bg); }
+
+    /* ── TOP BAR ────────────────────────────── */
+    .top-bar {
+      height: 44px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 20px; gap: 0;
+      flex-shrink: 0; z-index: 10;
+    }
+
+    .logo {
+      font-size: 17px; font-weight: 700;
+      letter-spacing: 5px; color: var(--cyan);
+      margin-right: 20px;
+    }
+
+    .state-pill {
+      display: flex; align-items: center; gap: 7px;
+      border-radius: 100px; padding: 3px 12px 3px 8px;
+      margin-right: 18px; border: 1px solid;
+      transition: all 0.3s;
+    }
+    .state-pill.running { background: var(--green-dim); border-color: var(--green); }
+    .state-pill.idle    { background: rgba(59,130,246,0.1); border-color: var(--blue); }
+    .state-pill.fault   { background: var(--red-dim); border-color: var(--red); }
+    .state-pill.estop   { background: var(--red-dim); border-color: var(--red); }
+
+    .state-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .state-pill.running .state-dot { background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse-dot 1.4s ease-in-out infinite; }
+    .state-pill.idle    .state-dot { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+    .state-pill.fault   .state-dot { background: var(--red);  box-shadow: 0 0 8px var(--red);  animation: blink 0.5s infinite; }
+    .state-pill.estop   .state-dot { background: var(--red);  box-shadow: 0 0 8px var(--red);  animation: blink 0.8s infinite; }
+
+    .state-label { font-size: 14px; font-weight: 700; letter-spacing: 2px; }
+    .state-pill.running .state-label { color: var(--green); }
+    .state-pill.idle    .state-label { color: #60A5FA; }
+    .state-pill.fault   .state-label { color: #F87171; }
+    .state-pill.estop   .state-label { color: #F87171; }
+
+    /* User chip */
+    .user-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--elevated); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 10px 3px 8px;
+      font-family: var(--font); font-size: 12px; font-weight: 700;
+      letter-spacing: 1.5px; color: var(--text-2); cursor: pointer;
+      margin-right: 16px; transition: all 0.15s;
+    }
+    .user-chip:hover { border-color: var(--border-hi); color: var(--text); }
+    .user-avatar { width: 18px; height: 18px; border-radius: 50%; background: var(--border-hi); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-3); }
+
+    /* Rate badge on run screen */
+    .rate-badge {
+      margin-top: 8px; display: flex; align-items: center; gap: 6px;
+      background: var(--elevated); border: 1px solid var(--border);
+      border-radius: 20px; padding: 3px 12px;
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-3);
+    }
+    .rate-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); opacity: 0.5; }
+
+    .wo-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .wo-num  { font-family: var(--font-mono); font-size: 14px; color: var(--text-2); }
+    .wo-sep  { color: var(--text-3); }
+    .wo-mat  { font-size: 15px; font-weight: 600; letter-spacing: 1px; color: var(--text); }
+    .wo-time { font-family: var(--font-mono); font-size: 13px; color: var(--text-3); }
+    .wo-none { font-size: 14px; color: var(--text-3); font-style: italic; }
+
+    .top-right { display: flex; align-items: center; gap: 20px; }
+    .safety { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; }
+    .safety .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .safety.ok  .dot { background: var(--green); }
+    .safety.ok  { color: #86EFAC; }
+    .safety.estop-off .dot { background: var(--green); }
+    .safety.estop-off { color: #86EFAC; }
+    .safety.estop-on  .dot { background: var(--red); animation: blink 0.8s infinite; }
+    .safety.estop-on  { color: #FCA5A5; }
+    .top-clock { font-family: var(--font-mono); font-size: 14px; color: var(--text-3); }
+
+    /* ── SENSOR BANNER ───────────────────────── */
+    .sensor-banner {
+      height: 36px; flex-shrink: 0;
+      background: var(--amber-dim); border-bottom: 1px solid rgba(240,168,0,0.4);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--amber);
+    }
+    .sensor-banner.hidden { display: none; }
+    .sbdot { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); animation: blink 1s infinite; }
+
+    /* ── E-STOP BANNER ───────────────────────── */
+    .estop-banner {
+      height: 42px; flex-shrink: 0;
+      background: #1C0404; border-bottom: 2px solid var(--red);
+      display: flex; align-items: center; justify-content: center; gap: 14px;
+      font-size: 14px; font-weight: 700; letter-spacing: 3px; color: var(--red);
+    }
+    .estop-banner.hidden { display: none; }
+    .estop-blink { animation: blink 0.6s infinite; }
+
+    /* ── MAIN ────────────────────────────────── */
+    .main-area { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+    .screen { display: none; flex: 1; overflow: hidden; }
+    .screen.active { display: flex; }
+
+    /* ── RUN SCREEN (3-zone column layout) ───── */
+    #screen-run { flex-direction: column; }
+
+    /* ── RUN SCREEN ZONES ─────────────────────── */
+
+    /* Zone 1 — Unit cards (fills all remaining height) */
+    .run-units-row {
+      flex: 1; display: flex; border-bottom: 1px solid var(--border);
+      min-height: 0;
+    }
+    .unit-card {
+      flex: 1; display: flex; flex-direction: column;
+      padding: 22px 32px; position: relative; overflow: hidden;
+    }
+    .unit-card:first-child { border-right: 1px solid var(--border); }
+    .unit-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+    }
+    .unit-card.cutting::before { background: radial-gradient(ellipse at 50% 30%, rgba(30,186,85,0.08) 0%, transparent 70%); }
+    .unit-card.ready::before   { background: radial-gradient(ellipse at 50% 30%, rgba(59,130,246,0.06) 0%, transparent 70%); }
+    .unit-card.fault::before   { background: radial-gradient(ellipse at 50% 30%, rgba(232,56,56,0.10) 0%, transparent 70%); }
+    .unit-card.paused::before  { background: radial-gradient(ellipse at 50% 30%, rgba(240,168,0,0.06) 0%, transparent 70%); }
+
+    /* Unit card — header (top row) */
+    .uc-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .uc-name { font-size: 13px; font-weight: 700; letter-spacing: 4px; color: var(--text-3); text-transform: uppercase; }
+
+    /* Large status icon (circle) — main visual in card body */
+    .u-dot {
+      width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .u-dot.cutting {
+      background: radial-gradient(circle, rgba(30,186,85,0.35) 0%, rgba(30,186,85,0.12) 100%);
+      border: 2.5px solid var(--green);
+      box-shadow: 0 0 28px rgba(30,186,85,0.45), inset 0 0 16px rgba(30,186,85,0.12);
+      animation: pulse-dot 1.4s infinite;
+    }
+    .u-dot.ready {
+      background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, rgba(59,130,246,0.08) 100%);
+      border: 2.5px solid var(--blue);
+      box-shadow: 0 0 18px rgba(59,130,246,0.3);
+    }
+    .u-dot.fault {
+      background: radial-gradient(circle, rgba(232,56,56,0.35) 0%, rgba(232,56,56,0.12) 100%);
+      border: 2.5px solid var(--red);
+      box-shadow: 0 0 24px rgba(232,56,56,0.5);
+      animation: blink 0.5s infinite;
+    }
+    .u-dot.paused {
+      background: radial-gradient(circle, rgba(240,168,0,0.25) 0%, rgba(240,168,0,0.08) 100%);
+      border: 2.5px solid var(--amber);
+    }
+
+    /* Status text label below icon */
+    .unit-status-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .u-status { font-size: 22px; font-weight: 700; letter-spacing: 4px; }
+    .u-status.cutting { color: var(--green); }
+    .u-status.ready   { color: #60A5FA; }
+    .u-status.fault   { color: #F87171; }
+    .u-status.paused  { color: var(--amber); }
+
+    /* Unit card — body: two zones so circle never moves */
+    .uc-body {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; position: relative; z-index: 1;
+    }
+    /* Top zone: circle + status label, always centered in remaining space */
+    .unit-status-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+    }
+    /* Bottom zone: fixed height — holds metric OR fault info */
+    .uc-bottom-zone {
+      width: 100%; height: 82px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding-bottom: 14px; position: relative;
+    }
+    /* Last cut metric */
+    .uc-metric { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .uc-metric-lbl { font-size: 11px; font-weight: 700; letter-spacing: 3px; color: var(--text-3); text-transform: uppercase; }
+    .uc-metric-val { font-family: var(--font-mono); font-size: 38px; line-height: 1; color: var(--text-2); letter-spacing: -1px; }
+    /* hide metric when fault, show fault info */
+    .unit-card.fault .uc-metric { display: none; }
+
+    /* Zone 2 — Cut Rate row */
+    .run-rate-row {
+      height: 68px; flex-shrink: 0; display: flex; align-items: center;
+      justify-content: center;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 0 28px; gap: 16px; cursor: pointer;
+      transition: background 0.15s; position: relative;
+    }
+    .run-rate-row:hover { background: var(--elevated); }
+    .rate-ctrl-info { display: flex; align-items: baseline; gap: 10px; }
+    .rate-ctrl-lbl { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; }
+    .rate-ctrl-num {
+      font-family: var(--font-mono); font-size: 42px; line-height: 1;
+      color: var(--cyan); letter-spacing: -1px;
+      text-shadow: 0 0 28px rgba(0,200,240,0.35);
+    }
+    .rate-ctrl-unit { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; }
+    .ds-badge { font-size: 11px; font-weight: 800; letter-spacing: 1px; color: var(--amber); background: rgba(245,158,11,0.12); border: 1.5px solid rgba(245,158,11,0.4); border-radius: 5px; padding: 2px 7px; align-self: center; }
+
+    /* Zone 3 — Log Basket row */
+    .run-basket-row {
+      height: 76px; flex-shrink: 0; display: flex; align-items: center;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding: 10px 20px;
+    }
+    .btn-basket-main {
+      flex: 1; height: 100%;
+      background: var(--cyan-dim); border: 1.5px solid rgba(0,200,240,0.32);
+      border-radius: 10px; color: var(--cyan);
+      font-family: var(--font); font-size: 18px; font-weight: 700;
+      letter-spacing: 3px; cursor: pointer; text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .btn-basket-main:hover    { background: rgba(0,200,240,0.2); border-color: var(--cyan); }
+    .btn-basket-main:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    /* Light overrides for new unit-card */
+    html.light .unit-card.cutting::before { background: radial-gradient(ellipse at 50% 30%, rgba(26,122,58,0.07) 0%, transparent 70%); }
+    html.light .unit-card.ready::before   { background: radial-gradient(ellipse at 50% 30%, rgba(26,95,168,0.05) 0%, transparent 70%); }
+    html.light .unit-card.fault::before   { background: radial-gradient(ellipse at 50% 30%, rgba(184,24,24,0.07) 0%, transparent 70%); }
+    html.light .u-dot.cutting { box-shadow: 0 0 6px var(--green); }
+    html.light .u-dot.ready   { box-shadow: 0 0 5px var(--blue); }
+    html.light .rate-ctrl-num { text-shadow: none; }
+    .rate-edit-icon {
+      position: absolute; right: 20px;
+      font-size: 16px; color: var(--text-3); pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* ── CENTER RATE PANEL ──────────────────── */
+    .rate-panel {
+      width: 140px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      position: relative; cursor: pointer; transition: background 0.15s;
+    }
+    .rate-panel:hover { background: var(--elevated); }
+    .rate-panel-num {
+      font-family: var(--font-mono); font-size: 58px; line-height: 1;
+      color: var(--cyan); letter-spacing: -2px;
+      text-shadow: 0 0 30px rgba(0,200,240,0.35);
+    }
+    .rate-panel-unit {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px;
+      color: var(--text-3); text-transform: uppercase;
+    }
+    .rate-panel-lbl {
+      font-size: 11px; letter-spacing: 1.5px;
+      color: var(--border-hi); text-transform: uppercase; font-weight: 700;
+    }
+    .rate-panel-edit {
+      position: absolute; right: 20px;
+      padding: 6px 16px;
+      background: transparent; border: 1px solid var(--border-hi);
+      border-radius: 5px; color: var(--text-3);
+      font-family: var(--font); font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase;
+      transition: all 0.15s;
+    }
+    .rate-panel-edit:hover { border-color: var(--cyan); color: var(--cyan); }
+    html.light .rate-panel-num { text-shadow: none; }
+
+    /* ── INLINE FAULT DISPLAY ───────────────── */
+    .uc-fault-info {
+      display: none; flex-direction: column; align-items: center; gap: 10px;
+      text-align: center; width: 100%; padding: 0 16px;
+    }
+    .uc-fault-info.show { display: flex; }
+    .uc-fault-msg {
+      font-size: 13px; color: #F87171; letter-spacing: 0.3px;
+      max-width: 240px; line-height: 1.4;
+    }
+    .uc-fault-ack {
+      padding: 8px 28px;
+      background: var(--red-dim); border: 1.5px solid var(--red);
+      border-radius: 8px; color: #F87171; font-family: var(--font);
+      font-size: 12px; font-weight: 700; letter-spacing: 2px;
+      cursor: pointer; text-transform: uppercase; transition: all 0.15s;
+    }
+    .uc-fault-ack:hover { background: rgba(232,56,56,0.25); }
+
+    /* ── ACTION BAR ──────────────────────────── */
+    .action-bar {
+      height: 96px; background: var(--surface); border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 40px; gap: 16px; flex-shrink: 0;
+    }
+    .action-fault-msg { font-size: 12px; color: var(--red); }
+
+    .btn {
+      height: 64px; padding: 0 48px; border-radius: 10px;
+      font-family: var(--font); font-size: 18px; font-weight: 700;
+      letter-spacing: 3px; cursor: pointer; text-transform: uppercase;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-end    { background: var(--amber-dim); border: 1px solid rgba(240,168,0,0.3); color: var(--amber); }
+    .btn-end:hover { background: rgba(240,168,0,0.2); border-color: var(--amber); }
+    .btn-stop   { background: var(--red-dim); border: 1px solid rgba(232,56,56,0.3); color: #F87171; }
+    .btn-stop:hover { background: rgba(232,56,56,0.2); border-color: var(--red); }
+    .btn-start  { background: var(--green-dim); border: 1.5px solid var(--green); color: #86EFAC; box-shadow: 0 0 16px rgba(30,186,85,0.15); }
+    .btn-start:hover { background: rgba(30,186,85,0.2); }
+    .btn-resume { background: rgba(59,130,246,0.1); border: 1.5px solid var(--blue); color: #93C5FD; box-shadow: 0 0 16px rgba(59,130,246,0.15); }
+    .btn-resume:hover { background: rgba(59,130,246,0.2); }
+    .btn-ack    { background: var(--red-dim); border: 1.5px solid var(--red); color: #F87171; }
+    .btn-ack:hover { background: rgba(232,56,56,0.25); }
+
+    /* ── BODY ROW / CONTENT COL ─────────────── */
+    .body-row    { flex: 1; display: flex; overflow: hidden; }
+    .content-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── NAV BAR (vertical left) ─────────────── */
+    .nav-bar {
+      width: 72px; background: #050810;
+      border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0;
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+      cursor: pointer; border-left: 3px solid transparent;
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--text-3); text-transform: uppercase; transition: all 0.15s;
+    }
+    .nav-item:hover { color: var(--text-2); background: rgba(255,255,255,0.015); }
+    .nav-item.active { color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,200,240,0.04); }
+    .nav-icon { font-size: 22px; line-height: 1; }
+
+    /* ── MANUAL SCREEN ───────────────────────── */
+    #screen-manual { flex-direction: column; }
+    .manual-warn {
+      height: 34px; flex-shrink: 0;
+      background: var(--amber-dim); border-bottom: 1px solid rgba(240,168,0,0.25);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--amber);
+    }
+    .manual-body { flex: 1; display: flex; }
+    .manual-unit {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px; padding: 16px;
+    }
+    .manual-unit-name { font-size: 12px; font-weight: 700; letter-spacing: 4px; color: var(--text-3); }
+    .blade-pos { display: flex; align-items: center; gap: 6px; }
+    .blade-pos-lbl { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: var(--text-3); }
+    .blade-pos-val { font-family: var(--font-mono); font-size: 11px; color: var(--green); }
+    .btn-cut {
+      width: 150px; height: 150px; border-radius: 50%;
+      background: rgba(30,186,85,0.07); border: 2px solid rgba(30,186,85,0.3);
+      color: var(--green); font-family: var(--font); font-size: 18px; font-weight: 700;
+      letter-spacing: 3px; cursor: pointer; transition: all 0.12s;
+      box-shadow: 0 0 40px rgba(30,186,85,0.08);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-cut:hover { background: rgba(30,186,85,0.14); border-color: var(--green); box-shadow: 0 0 60px rgba(30,186,85,0.18); transform: scale(1.02); }
+    .btn-cut:active { transform: scale(0.96); background: rgba(30,186,85,0.22); }
+    .manual-count { font-family: var(--font-mono); font-size: 12px; color: var(--text-3); }
+
+    /* ── PRODUCTION SCREEN ───────────────────── */
+    #screen-production { flex-direction: column; }
+    .prod-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: var(--surface); flex-shrink: 0;
+    }
+    .prod-tab {
+      padding: 10px 22px; font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; color: var(--text-3); cursor: pointer;
+      border-bottom: 2px solid transparent; text-transform: uppercase; transition: all 0.15s;
+    }
+    .prod-tab:hover { color: var(--text-2); }
+    .prod-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+    .prod-content { flex: 1; overflow: hidden; }
+    .prod-panel { display: none; height: 100%; }
+    .prod-panel.active { display: flex; }
+
+    #prod-active { flex-direction: row; padding: 14px 18px; gap: 12px; }
+    .prod-col { display: flex; flex-direction: column; gap: 10px; }
+    .prod-col-main { flex: 1.4; }
+    .prod-col-side { flex: 1; }
+
+    .pcard {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 9px; padding: 11px 14px;
+    }
+    .pcard-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin-bottom: 10px; }
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi { display: flex; flex-direction: column; gap: 2px; }
+    .kpi-lbl { font-size: 9px; letter-spacing: 1px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
+    .kpi-val { font-family: var(--font-mono); font-size: 17px; color: var(--text); }
+    .kpi-val.c { color: var(--cyan); }
+    .kpi-sub { font-size: 10px; color: var(--text-3); }
+
+    .basket-list { display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+    .brow {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 8px; background: var(--elevated); border-radius: 5px;
+      font-family: var(--font-mono); font-size: 11px; color: var(--text-2);
+    }
+    .brow-unit { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-3); width: 38px; }
+    .brow-wt { color: var(--cyan); }
+    .brow-cuts { color: var(--text-3); margin-left: auto; }
+    .brow-ts { font-size: 9px; color: var(--text-3); margin-left: 8px; }
+
+    #prod-history { flex-direction: column; padding: 12px 16px; gap: 8px; }
+    .hist-toolbar { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .chip { padding: 4px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; font-size: 11px; color: var(--text-3); cursor: pointer; transition: all 0.15s; }
+    .chip:hover { border-color: var(--border-hi); color: var(--text-2); }
+    .chip.on { border-color: var(--cyan); color: var(--cyan); }
+    .hist-spacer { flex: 1; }
+    .btn-csv { padding: 5px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1px; color: var(--text-3); cursor: pointer; transition: all 0.15s; }
+    .btn-csv:hover { border-color: var(--border-hi); color: var(--text-2); }
+    .hist-scroll { flex: 1; overflow-y: auto; }
+    .hist-scroll table { width: 100%; border-collapse: collapse; }
+    .hist-scroll th { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-3); text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; position: sticky; top: 0; background: var(--bg); }
+    .hist-scroll td { font-family: var(--font-mono); font-size: 12px; color: var(--text-2); padding: 8px 10px; border-bottom: 1px solid rgba(26,45,64,0.5); }
+    .hist-scroll tr:hover td { background: rgba(255,255,255,0.02); cursor: pointer; }
+    .td-wo { color: var(--cyan) !important; }
+    .td-mat { font-family: var(--font) !important; font-size: 13px !important; font-weight: 600; color: var(--text) !important; }
+    .good { color: var(--green); }
+    .warn { color: var(--amber); }
+    .bad  { color: var(--red); }
+    .brow-empty { font-size: 11px; color: var(--text-3); text-align: center; padding: 16px 0; }
+
+    .hist-mat-filter { padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 11px; color: var(--text-2); cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23607080' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 9px center; padding-right: 26px; }
+    .hist-mat-filter:focus { outline: none; border-color: var(--cyan); }
+
+    .btn-log-blade { padding: 4px 12px; background: var(--elevated); border: 1px solid var(--border); border-radius: 6px; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--text-3); cursor: pointer; text-transform: uppercase; transition: all 0.15s; }
+    .btn-log-blade:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .bc-unit-btn { flex: 1; padding: 10px; background: var(--elevated); border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; font-weight: 700; letter-spacing: 1px; color: var(--text-3); cursor: pointer; transition: all 0.15s; text-transform: uppercase; }
+    .bc-unit-btn.on { border-color: var(--cyan); color: var(--cyan); background: rgba(0,200,240,0.07); }
+
+    .wod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+    .wod-cell { background: var(--elevated); padding: 10px 12px; border-radius: 7px; }
+    .wod-cell .kpi-lbl { margin-bottom: 4px; }
+
+    /* ── MAINTENANCE SCREEN ──────────────────── */
+    #screen-maintenance { flex-direction: row; padding: 12px 16px; gap: 12px; }
+    .mc { display: flex; flex-direction: column; gap: 10px; }
+    .mc-l { flex: 1.2; } .mc-r { flex: 1; }
+
+    .mcard { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 11px 14px; }
+    .mcard-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin-bottom: 10px; }
+
+    .blade-row { display: flex; gap: 14px; }
+    .blade-unit { flex: 1; }
+    .blade-unit-name { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 5px; }
+    .blade-track { height: 7px; background: var(--elevated); border-radius: 4px; overflow: hidden; margin-bottom: 4px; }
+    .blade-fill { height: 100%; border-radius: 4px; transition: width 1s; }
+    .blade-fill.good { background: var(--green); }
+    .blade-fill.warn { background: var(--amber); }
+    .blade-fill.crit { background: var(--red); }
+    .blade-meta { display: flex; justify-content: space-between; }
+    .blade-meta span { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); }
+    .blade-pct { font-size: 13px; font-weight: 700; }
+    .blade-pct.good { color: var(--green); }
+    .blade-pct.warn { color: var(--amber); }
+
+    .sensor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .sensor-item { display: flex; align-items: center; gap: 7px; background: var(--elevated); border-radius: 6px; padding: 6px 9px; }
+    .s-dot2 { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .s-dot2.ok  { background: var(--green); }
+    .s-dot2.err { background: var(--red); animation: blink 0.5s infinite; }
+    .s-info { flex: 1; }
+    .s-name { font-size: 10px; font-weight: 700; color: var(--text-2); }
+    .s-unit { font-size: 9px; color: var(--text-3); }
+    .s-ok-lbl { font-size: 10px; font-weight: 700; color: var(--green); }
+
+    .fault-list { display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+    .fitem { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--elevated); border-radius: 5px; border-left: 2px solid var(--border); }
+    .fitem.hi { border-left-color: var(--red); }
+    .fitem.md { border-left-color: var(--amber); }
+    .f-ts { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); flex-shrink: 0; width: 72px; }
+    .f-unit { font-size: 10px; font-weight: 700; color: var(--text-3); width: 36px; flex-shrink: 0; }
+    .f-desc { font-size: 12px; color: var(--text-2); }
+
+    /* ── SETTINGS SCREEN ─────────────────────── */
+    #screen-settings { flex-direction: row; padding: 12px 16px; gap: 12px; }
+    .sc { display: flex; flex-direction: column; gap: 10px; }
+    .sc-l { flex: 1.3; } .sc-r { flex: 1; }
+
+    .scard { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 11px 14px; }
+    .scard-title { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .scard-title button { font-size: 10px; font-weight: 600; padding: 2px 8px; background: transparent; border: 1px solid var(--border-hi); border-radius: 4px; color: var(--text-3); cursor: pointer; letter-spacing: 1px; }
+
+    .mat-list { display: flex; flex-direction: column; gap: 3px; }
+    .mat-row { display: flex; align-items: center; gap: 9px; padding: 7px 10px; background: var(--elevated); border-radius: 6px; cursor: pointer; transition: background 0.1s; border: 1px solid transparent; }
+    .mat-row:hover { background: var(--border); }
+    .mat-row.on { background: rgba(0,200,240,0.07); border-color: rgba(0,200,240,0.2); }
+    .mat-code { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); width: 58px; }
+    .mat-name { font-size: 13px; color: var(--text); flex: 1; }
+    .mat-rate { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+    .mat-ds { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--amber); background: rgba(240,168,0,0.1); border: 1px solid rgba(240,168,0,0.2); border-radius: 3px; padding: 1px 5px; }
+
+    .set-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .set-row:last-child { border-bottom: none; }
+    .set-lbl { font-size: 12px; color: var(--text-2); }
+    .set-val {
+      font-family: var(--font-mono); font-size: 12px; color: var(--cyan);
+      background: var(--elevated); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 10px; min-width: 70px; text-align: center;
+      transition: border-color 0.15s;
+    }
+    .set-val.editable { cursor: pointer; }
+    .set-val.editable:hover { border-color: var(--cyan); }
+
+    /* Settings lock overlay */
+    .scard-wrap { position: relative; }
+    .settings-lock-overlay {
+      display: none; position: absolute; inset: 0; z-index: 10;
+      background: rgba(7,11,18,0.82); border-radius: 9px;
+      border: 1px solid var(--border-hi);
+      backdrop-filter: blur(2px);
+      flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    }
+    .settings-lock-overlay.show { display: flex; }
+    .lock-icon { font-size: 28px; opacity: 0.6; }
+    .lock-msg { font-size: 11px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; }
+    .lock-btn {
+      margin-top: 4px; padding: 6px 18px;
+      background: var(--elevated); border: 1px solid var(--border-hi);
+      border-radius: 6px; color: var(--text-2); font-family: var(--font);
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      cursor: pointer; text-transform: uppercase;
+    }
+    .lock-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+    .set-val-input {
+      font-family: var(--font-mono); font-size: 12px; color: var(--cyan);
+      background: var(--elevated); border: 1px solid var(--cyan);
+      border-radius: 4px; padding: 2px 6px; min-width: 70px; text-align: center;
+      outline: none; box-shadow: 0 0 0 2px rgba(0,200,240,0.12);
+      width: 90px;
+    }
+
+    /* Toggle switch */
+    .toggle-track {
+      width: 36px; height: 20px; background: var(--elevated);
+      border: 1px solid var(--border-hi); border-radius: 10px;
+      position: relative; cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+    }
+    .toggle-track.on { background: rgba(0,200,240,0.2); border-color: var(--cyan); }
+    .toggle-track::after {
+      content: ''; position: absolute; top: 3px; left: 3px;
+      width: 12px; height: 12px; background: var(--text-3);
+      border-radius: 50%; transition: all 0.2s;
+    }
+    .toggle-track.on::after { left: 19px; background: var(--cyan); }
+
+    /* Mat modal grid */
+    .mat-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+    .mat-form-grid .modal-field:nth-child(3) { grid-column: 1/-1; }
+
+    /* ── MODAL ───────────────────────────────── */
+    .modal-backdrop {
+      display: none; position: absolute; inset: 0;
+      background: rgba(7,11,18,0.88); backdrop-filter: blur(5px);
+      z-index: 100; align-items: center; justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--elevated); border: 1px solid var(--border-hi);
+      border-radius: 16px; padding: 32px 36px; min-width: 440px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.65);
+    }
+    .modal-title { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--text); text-transform: uppercase; margin-bottom: 4px; }
+    .modal-sub   { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+    .modal-meta  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .mmeta { background: var(--surface); border-radius: 8px; padding: 10px 14px; }
+    .mmeta-lbl { font-size: 10px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .mmeta-val { font-family: var(--font-mono); font-size: 18px; color: var(--text-2); }
+    .modal-field { margin-bottom: 18px; }
+    .modal-lbl { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; }
+    .modal-input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 9px; padding: 12px 16px;
+      font-family: var(--font-mono); font-size: 22px; color: var(--text);
+      outline: none; text-align: center; letter-spacing: 2px;
+    }
+    .modal-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,200,240,0.12); }
+    .modal-input.err  { border-color: var(--red); }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .modal-cancel  { padding: 12px 24px; background: transparent; border: 1px solid var(--border-hi); border-radius: 9px; color: var(--text-3); font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
+    .modal-confirm { padding: 12px 28px; border-radius: 9px; font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
+    .modal-confirm.c-cyan  { background: var(--cyan-dim); border: 1px solid var(--cyan); color: var(--cyan); }
+    .modal-confirm.c-amber { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
+    .modal-confirm:hover { opacity: 0.85; }
+
+    /* End Work modal */
+    .ew-units { display: flex; gap: 10px; margin-bottom: 18px; }
+    .ew-unit { flex: 1; background: var(--surface); border: 1px solid var(--border-hi); border-radius: 8px; padding: 11px 12px; }
+    .ew-unit-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 8px; text-transform: uppercase; }
+    .ew-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-bottom: 8px; }
+
+    /* ── KEYFRAMES ───────────────────────────── */
+    @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
+    @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── SCROLLBAR ───────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
+
+    /* ── PIN PAD ────────────────────────────── */
+    .pin-dots-row { display: flex; gap: 16px; justify-content: center; margin-bottom: 20px; }
+    .pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--border); border: 2px solid var(--border-hi);
+      transition: all 0.15s;
+    }
+    .pin-dot.filled { background: var(--cyan); border-color: var(--cyan); }
+    .pin-dot.err    { background: var(--red);  border-color: var(--red); }
+    .pin-pad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 14px;
+    }
+    .pin-key {
+      height: 52px; background: var(--elevated); border: 1px solid var(--border-hi);
+      border-radius: 8px; color: var(--text); font-family: var(--font);
+      font-size: 20px; font-weight: 700; cursor: pointer; transition: all 0.12s;
+    }
+    .pin-key:hover  { background: var(--border); }
+    .pin-key:active { transform: scale(0.93); }
+
+    /* Modal native select */
+    .modal-select {
+      width: 100%; background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 9px; padding: 12px 16px;
+      font-family: var(--font); font-size: 15px; color: var(--text);
+      outline: none; cursor: pointer;
+    }
+    .modal-select:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,200,240,0.12); }
+    html.light .modal-select { background: var(--surface); color: var(--text); }
+
+    /* ── DEMO PANEL ──────────────────────────── */
+    .demo-panel {
+      width: 1024px; margin-top: 10px;
+      background: #0A0E18; border: 1px solid #1A2030;
+      border-radius: 8px; padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+    .demo-lbl { font-size: 9px; color: #2A3A50; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin-right: 4px; white-space: nowrap; }
+    .demo-sep { width: 1px; height: 20px; background: #1A2030; margin: 0 4px; }
+    .demo-btn { padding: 5px 14px; background: #0D1525; border: 1px solid #1A2D40; border-radius: 5px; font-size: 11px; font-family: 'Rajdhani', sans-serif; font-weight: 600; color: #3A5070; cursor: pointer; letter-spacing: 0.5px; transition: all 0.1s; white-space: nowrap; }
+    .demo-btn:hover { color: #6090B0; border-color: #2A4060; }
+    .demo-btn.d-red:hover   { color: #E05050; border-color: #803030; }
+    .demo-btn.d-amber:hover { color: #D09020; border-color: #705010; }
+    .demo-btn.d-green:hover { color: #30A060; border-color: #1A5030; }
+      /* New WO modal select */
+    .mat-select { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+    .mat-opt { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; transition: all 0.12s; }
+    .mat-opt:hover { border-color: var(--border-hi); }
+    .mat-opt.sel { background: var(--cyan-dim); border-color: rgba(0,200,240,0.35); }
+    .mat-opt-code { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); width: 55px; }
+    .mat-opt-name { font-size: 13px; color: var(--text); flex: 1; }
+    .mat-opt-rate { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
+
+    /* User switch modal */
+    .user-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+    .user-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; transition: all 0.12s; }
+    .user-opt:hover { border-color: var(--border-hi); }
+    .user-opt.sel { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.35); }
+    .user-opt-av { width: 28px; height: 28px; border-radius: 50%; background: var(--elevated); border: 1px solid var(--border-hi); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--text-3); }
+    .user-opt-name { font-size: 13px; color: var(--text); font-weight: 600; }
+    .user-opt-role { font-size: 10px; color: var(--text-3); letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+<div class="hmi-frame">
+<div class="layout">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="logo">SNAP·CUT</div>
+    <div class="state-pill running" id="state-pill">
+      <div class="state-dot" id="state-dot"></div>
+      <span class="state-label" id="state-label">RUNNING</span>
+    </div>
+    <div class="wo-info" id="wo-info">
+      <span class="wo-num" id="wo-num">—</span>
+      <span class="wo-sep">·</span>
+      <span class="wo-mat" id="wo-mat"></span>
+      <span class="wo-time" id="wo-time">◷ 00:00:00</span>
+    </div>
+    <button class="user-chip" id="admin-chip" onclick="openAdminPin()" title="Admin access">
+      <span id="admin-icon" style="font-size:13px;line-height:1">🔒</span>
+      <span id="admin-label">OPERATOR</span>
+    </button>
+    <div class="top-right">
+      <div class="safety estop-off" id="estop-ind"><div class="dot"></div><span>E-STOP</span></div>
+      <button id="theme-btn" onclick="toggleTheme()" title="Toggle theme"
+        style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;
+               font-size:14px;line-height:1;color:var(--text-3);transition:all 0.15s;"
+        onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--text)'"
+        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-3)'">☀</button>
+      <div class="top-clock" id="clock">—</div>
+    </div>
+  </div>
+
+  <!-- BODY ROW -->
+  <div class="body-row">
+    <!-- NAV BAR (vertical, left side) -->
+    <div class="nav-bar">
+      <div class="nav-item active" onclick="switchScreen('run',this)"><span class="nav-icon">◈</span><span>Run</span></div>
+      <div class="nav-item" onclick="switchScreen('manual',this)"><span class="nav-icon">⊡</span><span>Manual</span></div>
+      <div class="nav-item" onclick="switchScreen('production',this)"><span class="nav-icon">▦</span><span>Production</span></div>
+      <div class="nav-item" onclick="switchScreen('maintenance',this)"><span class="nav-icon">⚙</span><span>Maint.</span></div>
+      <div class="nav-item" onclick="switchScreen('settings',this)"><span class="nav-icon">≡</span><span>Settings</span></div>
+    </div>
+    <div class="content-col">
+      <!-- SENSOR BANNER — inside content col, same width as screens -->
+      <div class="sensor-banner hidden" id="sensor-banner">
+        <div class="sbdot"></div>
+        EXTERNAL SENSOR OFF — CUTTING PAUSED
+        <div class="sbdot"></div>
+      </div>
+      <!-- E-STOP BANNER -->
+      <div class="estop-banner hidden" id="estop-banner">
+        <span class="estop-blink">🛑</span>
+        E-STOP ACTIVE — RELEASE PHYSICAL BUTTON THEN ACKNOWLEDGE
+        <span class="estop-blink">🛑</span>
+      </div>
+  <!-- MAIN -->
+  <div class="main-area" id="main-area">
+
+    <!-- ══ RUN SCREEN ══════════════════════════ -->
+    <div class="screen active" id="screen-run">
+
+      <!-- Zone 1 — Unit status cards -->
+      <div class="run-units-row">
+
+        <!-- FRONT -->
+        <div class="unit-card cutting" id="col-front">
+          <div class="uc-header">
+            <span class="uc-name">Front</span>
+          </div>
+          <div class="uc-body">
+            <div class="unit-status-wrap">
+              <div class="u-dot cutting" id="fd"></div>
+              <span class="u-status cutting" id="fs">CUTTING</span>
+            </div>
+            <div class="uc-bottom-zone">
+              <div class="uc-fault-info" id="fault-info-front">
+                <span class="uc-fault-msg" id="fault-msg-front">Jam — End Sensor miss</span>
+                <button class="uc-fault-ack" onclick="ackFault()">✓ Acknowledge</button>
+              </div>
+              <div class="uc-metric">
+                <span class="uc-metric-lbl">Last Cut Ago</span>
+                <span class="uc-metric-val" id="fc-ago">—</span>
+              </div>
+            </div>
+          </div>
+          <span id="fr" style="display:none">0</span>
+        </div>
+
+        <!-- REAR -->
+        <div class="unit-card cutting" id="col-rear">
+          <div class="uc-header">
+            <span class="uc-name">Rear</span>
+          </div>
+          <div class="uc-body">
+            <div class="unit-status-wrap">
+              <div class="u-dot cutting" id="rd"></div>
+              <span class="u-status cutting" id="rs">CUTTING</span>
+            </div>
+            <div class="uc-bottom-zone">
+              <div class="uc-fault-info" id="fault-info-rear">
+                <span class="uc-fault-msg" id="fault-msg-rear">Jam — End Sensor miss</span>
+                <button class="uc-fault-ack" onclick="ackFault()">✓ Acknowledge</button>
+              </div>
+              <div class="uc-metric">
+                <span class="uc-metric-lbl">Last Cut Ago</span>
+                <span class="uc-metric-val" id="rc-ago">—</span>
+              </div>
+            </div>
+          </div>
+          <!-- Hidden refs for JS compatibility -->
+          <span id="rr" style="display:none">0</span>
+        </div>
+      </div>
+
+      <!-- Zone 2 — Cut Rate row -->
+      <div class="run-rate-row" onclick="openRateEdit()">
+        <div class="rate-ctrl-info">
+          <span class="rate-ctrl-lbl">Cut Rate</span>
+          <span class="rate-ctrl-num" id="shared-rate">24</span>
+          <span class="rate-ctrl-unit">c / min</span>
+          <span class="ds-badge" id="ds-badge" style="display:none">2×</span>
+        </div>
+      </div>
+
+      <!-- Zone 3 — Log Basket row -->
+      <div class="run-basket-row">
+        <button class="btn-basket-main" id="btn-basket" onclick="openBasket()">⊞ Log Basket — #<span id="basket-num-lbl">1</span></button>
+      </div>
+
+      <!-- Zone 4 — Action buttons (END WORK / STOP) -->
+      <div class="action-bar" id="action-bar">
+        <span class="action-fault-msg" id="a-fault" style="display:none"></span>
+        <button class="btn btn-end"    id="btn-end"    onclick="openEndWork()">⊠ End Work</button>
+        <button class="btn btn-stop"   id="btn-stop"   onclick="stopMachine()">■ Stop</button>
+        <button class="btn btn-new-wo" id="btn-new-wo" style="display:none;background:rgba(59,130,246,0.08);border:1.5px solid rgba(59,130,246,0.35);color:#93C5FD" onclick="openNewWO()">＋ New WO</button>
+        <button class="btn btn-start"  id="btn-start"  style="display:none" onclick="startMachine()">▶ Start</button>
+        <button class="btn btn-resume" id="btn-resume" style="display:none" onclick="resumeMachine()">▶ Resume</button>
+        <button class="btn btn-ack"    id="btn-ack"    style="display:none" onclick="ackFault()">✓ Acknowledge</button>
+      </div>
+
+    </div>
+
+    <!-- ══ MANUAL SCREEN ═══════════════════════ -->
+    <div class="screen" id="screen-manual">
+      <div class="manual-warn">⚠ MANUAL MODE — BLADE FIRES ON BUTTON PRESS</div>
+      <div class="manual-body">
+        <div class="manual-unit">
+          <div class="manual-unit-name">Front</div>
+          <div class="blade-pos">
+            <span class="blade-pos-lbl">BLADE</span>
+            <span class="blade-pos-val">HOME ●</span>
+          </div>
+          <button class="btn-cut" onclick="manualCut('f')">CUT</button>
+        </div>
+        <div class="col-divider" style="margin:20px 0"></div>
+        <div class="manual-unit">
+          <div class="manual-unit-name">Rear</div>
+          <div class="blade-pos">
+            <span class="blade-pos-lbl">BLADE</span>
+            <span class="blade-pos-val">HOME ●</span>
+          </div>
+          <button class="btn-cut" onclick="manualCut('r')">CUT</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PRODUCTION SCREEN ════════════════════ -->
+    <div class="screen" id="screen-production">
+      <div class="prod-tabs">
+        <div class="prod-tab active" onclick="switchProd('active',this)">Active WO</div>
+        <div class="prod-tab" onclick="switchProd('history',this)">History</div>
+      </div>
+      <div class="prod-content">
+
+        <!-- ── ACTIVE WO ─────────────────────── -->
+        <div class="prod-panel active" id="prod-active">
+          <div class="pcard">
+            <div class="pcard-title" id="p-wo-title">No active work order</div>
+            <div class="kpi-grid">
+              <div class="kpi">
+                <div class="kpi-lbl">Total Cuts</div>
+                <div class="kpi-val" id="p-cuts">0</div>
+                <div class="kpi-sub">Both units combined</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">WO Runtime</div>
+                <div class="kpi-val" id="p-runtime">—</div>
+                <div class="kpi-sub">Since WO started</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">Current Basket</div>
+                <div class="kpi-val" id="p-basket-num">—</div>
+                <div class="kpi-sub" id="p-basket-sub">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">Total Rejects</div>
+                <div class="kpi-val" id="p-total-weight">—</div>
+                <div class="kpi-sub">From logged baskets</div>
+              </div>
+            </div>
+          </div>
+          <div class="pcard" style="flex:1; min-height:0">
+            <div class="pcard-title">Basket Log</div>
+            <div class="basket-list" id="live-basket-list">
+              <div class="brow-empty">No baskets logged yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── HISTORY ──────────────────────── -->
+        <div class="prod-panel" id="prod-history">
+          <div class="hist-toolbar">
+            <select class="hist-mat-filter" id="hist-mat-filter" onchange="filterHistory()">
+              <option value="">All Materials</option>
+              <option>PE-LD Clean</option>
+              <option>PE-LD w/ Organics</option>
+              <option>PP Standard</option>
+              <option>EVA Foam</option>
+            </select>
+            <div class="hist-spacer"></div>
+            <button class="btn-csv">⬇ Export CSV</button>
+          </div>
+          <div class="hist-scroll">
+            <table id="hist-table">
+              <thead>
+                <tr><th>WO</th><th>Material</th><th>Started</th><th>Ended</th><th>Cuts</th><th>Rejects Wt</th><th>Runtime</th><th>Baskets</th></tr>
+              </thead>
+              <tbody id="hist-tbody">
+                <tr onclick="openWODetail(this)" data-wo="WO-0041" data-mat="PE-LD Clean" data-start="29 Apr 06:12" data-end="29 Apr 10:45" data-cuts="8,241" data-wt="97.4 kg" data-rt="4h 33m" data-baskets="8">
+                  <td class="td-wo">WO-0041</td><td class="td-mat">PE-LD Clean</td><td>29 Apr 06:12</td><td>29 Apr 10:45</td><td>8,241</td><td>97.4 kg</td><td>4h 33m</td><td>8</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0040" data-mat="PP Standard" data-start="29 Apr 11:00" data-end="29 Apr 14:22" data-cuts="6,104" data-wt="72.1 kg" data-rt="3h 22m" data-baskets="6">
+                  <td class="td-wo">WO-0040</td><td class="td-mat">PP Standard</td><td>29 Apr 11:00</td><td>29 Apr 14:22</td><td>6,104</td><td>72.1 kg</td><td>3h 22m</td><td>6</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0039" data-mat="EVA Foam" data-start="28 Apr 07:30" data-end="28 Apr 11:18" data-cuts="4,882" data-wt="58.6 kg" data-rt="3h 48m" data-baskets="5">
+                  <td class="td-wo">WO-0039</td><td class="td-mat">EVA Foam</td><td>28 Apr 07:30</td><td>28 Apr 11:18</td><td>4,882</td><td>58.6 kg</td><td>3h 48m</td><td>5</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0038" data-mat="PE-LD w/ Organics" data-start="28 Apr 12:00" data-end="28 Apr 16:01" data-cuts="5,430" data-wt="63.2 kg" data-rt="4h 01m" data-baskets="6">
+                  <td class="td-wo">WO-0038</td><td class="td-mat">PE-LD w/ Organics</td><td>28 Apr 12:00</td><td>28 Apr 16:01</td><td>5,430</td><td>63.2 kg</td><td>4h 01m</td><td>6</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0037" data-mat="PE-LD Clean" data-start="27 Apr 05:58" data-end="27 Apr 11:00" data-cuts="9,120" data-wt="108.1 kg" data-rt="5h 02m" data-baskets="9">
+                  <td class="td-wo">WO-0037</td><td class="td-mat">PE-LD Clean</td><td>27 Apr 05:58</td><td>27 Apr 11:00</td><td>9,120</td><td>108.1 kg</td><td>5h 02m</td><td>9</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0036" data-mat="PP Standard" data-start="27 Apr 11:30" data-end="27 Apr 15:35" data-cuts="7,330" data-wt="86.7 kg" data-rt="4h 05m" data-baskets="7">
+                  <td class="td-wo">WO-0036</td><td class="td-mat">PP Standard</td><td>27 Apr 11:30</td><td>27 Apr 15:35</td><td>7,330</td><td>86.7 kg</td><td>4h 05m</td><td>7</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAINTENANCE SCREEN ═══════════════════ -->
+    <div class="screen" id="screen-maintenance">
+      <div class="mc mc-l">
+        <div class="mcard">
+          <div class="mcard-title">Blade Status</div>
+          <div class="blade-row">
+            <div class="blade-unit">
+              <div class="blade-unit-name">Front</div>
+              <div class="blade-track"><div class="blade-fill good" id="blade-fill-front" style="width:0%"></div></div>
+              <div class="blade-meta"><span id="blade-meta-front">0 / 10,000 cuts</span><span class="blade-pct good" id="blade-pct-front">0%</span></div>
+            </div>
+            <div class="blade-unit">
+              <div class="blade-unit-name">Rear</div>
+              <div class="blade-track"><div class="blade-fill good" id="blade-fill-rear" style="width:0%"></div></div>
+              <div class="blade-meta"><span id="blade-meta-rear">0 / 10,000 cuts</span><span class="blade-pct good" id="blade-pct-rear">0%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="mcard" style="flex:1">
+          <div class="mcard-title">Fault History</div>
+          <div class="fault-list">
+            <div class="fitem hi"><span class="f-ts">14:18:32</span><span class="f-unit">REAR</span><span class="f-desc">Jam — End Sensor miss (3 attempts)</span></div>
+            <div class="fitem md"><span class="f-ts">11:44:07</span><span class="f-unit">FRONT</span><span class="f-desc">Cycle Time +18% — Blade wear warning</span></div>
+            <div class="fitem md"><span class="f-ts">10:02:51</span><span class="f-unit">REAR</span><span class="f-desc">Retract timeout — Home Sensor slow</span></div>
+            <div class="fitem hi"><span class="f-ts">28 Apr 15:33</span><span class="f-unit">FRONT</span><span class="f-desc">Jam — Material blockage</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="mc mc-r">
+        <div class="mcard">
+          <div class="mcard-title">Sensor Health</div>
+          <div class="sensor-grid">
+            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div><div class="s-unit">FRONT</div></div><div class="s-ok-lbl">OK</div></div>
+            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div><div class="s-unit">FRONT</div></div><div class="s-ok-lbl">OK</div></div>
+            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div><div class="s-unit">REAR</div></div><div class="s-ok-lbl">OK</div></div>
+            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div><div class="s-unit">REAR</div></div><div class="s-ok-lbl">OK</div></div>
+          </div>
+        </div>
+        <div class="mcard">
+          <div class="mcard-title">Run Hours</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="kpi"><div class="kpi-lbl">Total</div><div class="kpi-val" style="font-size:16px">284 h</div></div>
+            <div class="kpi"><div class="kpi-lbl">Since Service</div><div class="kpi-val" style="font-size:16px">48 h</div></div>
+          </div>
+        </div>
+        <div class="mcard" style="flex:1">
+          <div class="mcard-title" style="display:flex;align-items:center;justify-content:space-between">
+            Blade Change Log
+            <button class="btn-log-blade" onclick="openBladeChange()">⚒ Log Change</button>
+          </div>
+          <div id="blade-change-log" style="display:flex;flex-direction:column;gap:5px">
+            <div class="brow" style="font-size:11px"><span style="color:var(--text-3);min-width:110px">28 Apr 08:00</span><span style="color:var(--cyan);min-width:44px">REAR</span><span>Changed @ 9,870 cuts</span></div>
+            <div class="brow" style="font-size:11px"><span style="color:var(--text-3);min-width:110px">21 Apr 14:20</span><span style="color:var(--cyan);min-width:44px">FRONT</span><span>Changed @ 10,124 cuts</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS SCREEN ══════════════════════ -->
+    <div class="screen" id="screen-settings">
+      <div class="sc sc-l">
+        <div class="scard scard-wrap" style="flex:unset">
+          <div class="scard-title">Material Settings
+            <button id="btn-add-mat" onclick="openAddMat()">+ Add</button>
+          </div>
+          <div class="mat-list" id="mat-list"><!-- rendered by JS --></div>
+        </div>
+        <div class="scard" id="scard-air">
+          <div class="scard-title">Air Unit — Basket Release</div>
+          <div class="set-row">
+            <span class="set-lbl">Active</span>
+            <span class="set-val" id="air-active-val" style="color:var(--text-3)">OFF</span>
+          </div>
+          <div class="set-row">
+            <span class="set-lbl">Delay After Cut</span>
+            <span class="set-val" id="air-delay-val">2.0 s</span>
+          </div>
+          <div class="set-row" style="border:none">
+            <span class="set-lbl">Pulse Duration</span>
+            <span class="set-val" id="air-pulse-val">0.5 s</span>
+          </div>
+        </div>
+      </div>
+      <div class="sc sc-r">
+        <div class="scard scard-wrap" style="flex:unset">
+          <div class="scard-title">Global Unit Settings</div>
+          <div id="global-settings-rows"><!-- rendered by JS --></div>
+        </div>
+        <div class="scard">
+          <div class="scard-title">System</div>
+          <div class="set-row"><span class="set-lbl">Language</span><span class="set-val">EN</span></div>
+          <div class="set-row"><span class="set-lbl">Clock</span><span class="set-val" id="s-clock">—</span></div>
+          <div class="set-row"><span class="set-lbl">Admin Auto-logout</span><span class="set-val">15 min</span></div>
+          <div class="set-row" style="border:none;padding-top:10px">
+            <button style="width:100%;padding:7px;background:var(--elevated);border:1px solid var(--border-hi);border-radius:6px;color:var(--text-3);font-size:11px;font-weight:600;letter-spacing:1px;cursor:pointer">⬇ Export All Data to USB</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MODAL BACKDROP ═══════════════════════ -->
+    <div class="modal-backdrop" id="backdrop" onclick="backdropClick(event)">
+
+      <!-- Log Basket modal -->
+      <div class="modal" id="modal-basket" style="display:none">
+        <div class="modal-title" id="mb-title">Log Basket — #1</div>
+        <div class="modal-sub">Both units · rejects weight per unit</div>
+        <div class="modal-meta">
+          <div class="mmeta"><div class="mmeta-lbl">Total Cuts</div><div class="mmeta-val" id="mb-cuts">0</div></div>
+          <div class="mmeta"><div class="mmeta-lbl">Runtime</div><div class="mmeta-val" id="mb-time">00:00:00</div></div>
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Rejects Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <input class="modal-input" id="mb-weight" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="letter-spacing:0">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-cyan" onclick="confirmBasket()">Log Basket</button>
+        </div>
+      </div>
+
+      <!-- End Work modal -->
+      <div class="modal" id="modal-endwork" style="display:none;min-width:400px">
+        <div class="modal-title">End Work Order</div>
+        <div class="modal-sub" id="ew-sub">WO-0042 · PE-LD Clean</div>
+        <div class="ew-unit" style="margin-bottom:16px">
+          <div class="ew-unit-name">Final Basket — #<span id="ew-basket-num">1</span></div>
+          <div class="ew-meta" id="ew-meta">0 cuts · 00:00:00</div>
+          <div class="modal-field" style="margin-bottom:0">
+            <div class="modal-lbl">Rejects Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+            <input class="modal-input" id="ew-wt" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="font-size:14px;padding:7px 12px;letter-spacing:0">
+          </div>
+        </div>
+        <div class="modal-field" style="margin-bottom:20px">
+          <div class="modal-lbl">Net Output (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional — clean plastic out)</span></div>
+          <input class="modal-input" id="ew-output-wt" type="number" placeholder="e.g. 116.0" step="0.1" min="0" style="font-size:16px;padding:7px 12px;letter-spacing:0">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-amber" onclick="confirmEndWork()">Close WO</button>
+        </div>
+      </div>
+
+      <!-- New WO modal -->
+      <div class="modal" id="modal-newwo" style="display:none;min-width:380px">
+        <div class="modal-title">New Work Order</div>
+        <div class="modal-sub">Machine must be IDLE to open a WO</div>
+        <div class="modal-field">
+          <div class="modal-lbl">WO Number</div>
+          <input class="modal-input" id="nwo-num" type="text" placeholder="WO-0043" style="font-size:18px">
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Material</div>
+          <select class="modal-select" id="nwo-mat-sel"><!-- rendered by JS --></select>
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Customer <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <input class="modal-input" id="nwo-customer" type="text" placeholder="" style="font-size:14px;text-align:left;padding-left:14px;letter-spacing:0">
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Notes <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <input class="modal-input" id="nwo-notes" type="text" placeholder="" style="font-size:14px;text-align:left;padding-left:14px;letter-spacing:0">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-cyan" onclick="confirmNewWO()">Open WO</button>
+        </div>
+      </div>
+
+      <!-- Admin PIN modal -->
+      <div class="modal" id="modal-pin" style="display:none;min-width:300px">
+        <div class="modal-title">Admin Access</div>
+        <div class="modal-sub" id="pin-sub">Enter PIN to enable admin mode</div>
+        <div class="pin-dots-row">
+          <div class="pin-dot" id="pd-0"></div>
+          <div class="pin-dot" id="pd-1"></div>
+          <div class="pin-dot" id="pd-2"></div>
+          <div class="pin-dot" id="pd-3"></div>
+        </div>
+        <div class="pin-pad">
+          <button class="pin-key" onclick="pinKey(1)">1</button>
+          <button class="pin-key" onclick="pinKey(2)">2</button>
+          <button class="pin-key" onclick="pinKey(3)">3</button>
+          <button class="pin-key" onclick="pinKey(4)">4</button>
+          <button class="pin-key" onclick="pinKey(5)">5</button>
+          <button class="pin-key" onclick="pinKey(6)">6</button>
+          <button class="pin-key" onclick="pinKey(7)">7</button>
+          <button class="pin-key" onclick="pinKey(8)">8</button>
+          <button class="pin-key" onclick="pinKey(9)">9</button>
+          <button class="pin-key" onclick="pinKey('⌫')" style="font-size:16px">⌫</button>
+          <button class="pin-key" onclick="pinKey(0)">0</button>
+          <button class="pin-key" onclick="closeModal()">✕</button>
+        </div>
+      </div>
+
+      <!-- Cut Rate edit modal -->
+      <div class="modal" id="modal-rate" style="display:none;min-width:280px">
+        <div class="modal-title">Cut Rate</div>
+        <div class="modal-sub">Target cuts per minute for active WO</div>
+        <div class="modal-field">
+          <div class="modal-lbl">Rate (c / min)</div>
+          <input class="modal-input" id="rate-input" type="number" placeholder="24" min="1" max="60" step="1" style="font-size:36px;letter-spacing:-1px">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-cyan" onclick="confirmRateEdit()">Set Rate</button>
+        </div>
+      </div>
+
+      <!-- Material Edit / Add modal -->
+      <div class="modal" id="modal-mat" style="display:none;min-width:380px">
+        <div class="modal-title" id="mat-modal-title">Edit Material</div>
+        <div class="modal-sub">Changes apply to future Work Orders</div>
+        <div class="mat-form-grid">
+          <div class="modal-field">
+            <div class="modal-lbl">Code</div>
+            <input class="modal-input" id="mat-code" type="text" placeholder="PELD-C" maxlength="8" style="font-size:16px;letter-spacing:3px">
+          </div>
+          <div class="modal-field">
+            <div class="modal-lbl">Cut Rate (c/min)</div>
+            <input class="modal-input" id="mat-rate-input" type="number" placeholder="24" min="1" max="60" step="1" style="font-size:18px">
+          </div>
+          <div class="modal-field" style="grid-column:1/-1">
+            <div class="modal-lbl">Name</div>
+            <input class="modal-input" id="mat-name-input" type="text" placeholder="PE-LD Clean" style="font-size:16px;letter-spacing:1px;text-align:left;padding-left:14px">
+          </div>
+        </div>
+        <div class="modal-field" style="margin-bottom:20px">
+          <label style="display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toggleDS()">
+            <div class="toggle-track" id="mat-ds-track"></div>
+            <span style="font-size:13px;color:var(--text-2)">Double Stroke &nbsp;<span style="font-size:10px;color:var(--text-3)">(2× air cycles per cut)</span></span>
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" id="mat-delete-btn" onclick="deleteMaterial()" style="color:var(--red);border-color:rgba(232,56,56,0.3);margin-right:auto">Delete</button>
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-cyan" onclick="saveMaterial()">Save</button>
+        </div>
+      </div>
+
+      <!-- WO Detail modal -->
+      <div class="modal" id="modal-wo-detail" style="display:none;min-width:380px">
+        <div class="modal-title" id="wod-title">WO Detail</div>
+        <div class="modal-sub" id="wod-sub">—</div>
+        <div class="wod-grid">
+          <div class="wod-cell"><div class="kpi-lbl">Started</div><div class="kpi-val" id="wod-start" style="font-size:14px;color:var(--text-2)">—</div></div>
+          <div class="wod-cell"><div class="kpi-lbl">Ended</div><div class="kpi-val" id="wod-end" style="font-size:14px;color:var(--text-2)">—</div></div>
+          <div class="wod-cell"><div class="kpi-lbl">Total Cuts</div><div class="kpi-val" id="wod-cuts" style="font-size:22px">—</div></div>
+          <div class="wod-cell"><div class="kpi-lbl">Total Rejects</div><div class="kpi-val" id="wod-wt" style="font-size:22px">—</div></div>
+          <div class="wod-cell"><div class="kpi-lbl">Runtime</div><div class="kpi-val" id="wod-rt" style="font-size:22px">—</div></div>
+          <div class="wod-cell"><div class="kpi-lbl">Baskets</div><div class="kpi-val" id="wod-baskets" style="font-size:22px">—</div></div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-confirm c-cyan" onclick="closeModal()" style="min-width:100px">Close</button>
+        </div>
+      </div>
+
+      <!-- Blade Change modal -->
+      <div class="modal" id="modal-blade-change" style="display:none;min-width:320px">
+        <div class="modal-title">Log Blade Change</div>
+        <div class="modal-sub">Records change and resets blade cut counter</div>
+        <div class="modal-field">
+          <div class="modal-lbl">Unit</div>
+          <div style="display:flex;gap:10px">
+            <button id="bc-front-btn" class="bc-unit-btn on" onclick="selectBCUnit('FRONT')">Front</button>
+            <button id="bc-rear-btn" class="bc-unit-btn" onclick="selectBCUnit('REAR')">Rear</button>
+          </div>
+        </div>
+        <div class="modal-field" style="margin-bottom:4px">
+          <div class="modal-lbl">Notes <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <input class="modal-input" id="bc-notes" type="text" placeholder="" style="font-size:14px;text-align:left;padding-left:14px;letter-spacing:0">
+        </div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+          <button class="modal-confirm c-cyan" onclick="confirmBladeChange()">Log Change</button>
+        </div>
+      </div>
+
+    </div><!-- /backdrop -->
+  </div><!-- /main-area -->
+
+    </div><!-- /content-col -->
+  </div><!-- /body-row -->
+
+</div><!-- /layout -->
+</div><!-- /hmi-frame -->
+
+<!-- DEMO CONTROLS — outside HMI frame -->
+<div class="demo-panel">
+  <span class="demo-lbl">Simulator</span>
+  <div class="demo-sep"></div>
+  <button class="demo-btn d-amber" onclick="toggleSensor()">⚡ Sensor On/Off</button>
+  <div class="demo-sep"></div>
+  <button class="demo-btn d-red" onclick="triggerFault('FRONT')">⚠ Fault — Front</button>
+  <button class="demo-btn d-red" onclick="triggerFault('REAR')">⚠ Fault — Rear</button>
+  <button class="demo-btn d-red" onclick="triggerEstop()">🛑 E-Stop</button>
+  <div class="demo-sep"></div>
+  <button class="demo-btn d-green" onclick="demoNewWO()">↺ Reset to IDLE</button>
+  <button class="demo-btn d-green" onclick="demoNewWO(); openNewWO()">＋ Open New WO</button>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────
+let cfgRate = 24;
+let state = 'idle'; // running | idle | fault | estop
+let sensorOn = true;
+let fCuts = 0, rCuts = 0, totalCuts = 0;
+let woSec = 0;
+let mFront = 0, mRear = 0;
+let faultUnit = '';
+// Shared single-basket tracking (both units combined)
+let basketCuts = 0;
+let basketSec  = 0;
+let basketNum  = 1;
+let fLastCutMs = 0;
+let rLastCutMs = 0;
+let pendingMat = { code: 'PELD-C', name: 'PE-LD Clean', rate: 24 };
+let isAdminMode = false;
+let adminPinTimeout = null;
+const ADMIN_PIN = '1234';
+let pinEntry = '';
+let woStarted  = false; // true once startMachine() called on current WO
+let basketLog  = [];   // { num, cuts, sec, wt, ts }
+let totalWt   = 0;    // sum of weights from logged baskets
+let fBladeCuts = 7300;  // blade cut counters (simulated initial values)
+let rBladeCuts = 1400;
+let bcUnit = 'FRONT'; // selected unit in blade change modal
+let cutTimerPausedAt = 0; // Date.now() when cut-ago timer was frozen, 0 = running
+const airCfg = { active: false, delay: 2.0, pulse: 0.5 };
+
+// ── Clock & Timers ────────────────────────────────
+function tick() {
+  const now = new Date();
+  const t = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('clock').textContent = t;
+  document.getElementById('s-clock').textContent = t;
+
+  const timerActive = (state === 'running' && sensorOn);
+  if (timerActive) {
+    woSec++;
+    basketSec++;
+    // Update "last cut" displays — format: X.Xs below 60s, m:ss above
+    const nowMs = Date.now();
+    const fEl = document.getElementById('fc-ago');
+    const rEl = document.getElementById('rc-ago');
+    if (fEl && fLastCutMs) fEl.textContent = fmtAgo(nowMs - fLastCutMs);
+    if (rEl && rLastCutMs) rEl.textContent = fmtAgo(nowMs - rLastCutMs);
+  }
+  // ◷ = running, ⏸ = paused (sensor off / e-stop / idle)
+  const woTimeEl = document.getElementById('wo-time');
+  woTimeEl.textContent = (timerActive ? '◷ ' : '⏸ ') + fmtSec(woSec);
+  woTimeEl.style.color  = timerActive ? '' : 'var(--amber)';
+  // Production screen live updates
+  const pRun = document.getElementById('p-runtime');
+  if (pRun) pRun.textContent = fmtSec(woSec);
+  const pBn = document.getElementById('p-basket-num');
+  if (pBn) pBn.textContent = basketNum;
+  const pBs = document.getElementById('p-basket-sub');
+  if (pBs) pBs.textContent = basketCuts.toLocaleString() + ' cuts · ' + fmtSec(basketSec);
+}
+
+function fmtSec(s) {
+  return `${pad(Math.floor(s/3600))}:${pad(Math.floor((s%3600)/60))}:${pad(s%60)}`;
+}
+function fmtAgo(ms) {
+  const s = ms / 1000;
+  if (s < 60) return s.toFixed(1) + 's';
+  const m = Math.floor(s / 60), ss = Math.floor(s % 60);
+  return m + ':' + pad(ss);
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+
+
+// ── Live data simulation ──────────────────────────
+// Timestamp-based scheduling: each unit has a "next cut due" time.
+// simTick fires every 200ms, checks if it's time, fires the cut, schedules next.
+let nextFCutMs = 0;
+let nextRCutMs = 0;
+
+function cutInterval() {
+  // ms between cuts, with ±15% jitter for realism
+  return (60000 / cfgRate) * (0.85 + Math.random() * 0.30);
+}
+
+function initCutSchedule() {
+  const iv = 60000 / cfgRate;
+  // Stagger units so they don't fire simultaneously
+  nextFCutMs = Date.now() + iv * (0.3 + Math.random() * 0.4);
+  nextRCutMs = Date.now() + iv * (0.8 + Math.random() * 0.4);
+}
+
+function simTick() {
+  if (state !== 'running' || !sensorOn) return;
+  const nowMs = Date.now();
+
+  if (faultUnit !== 'FRONT' && nextFCutMs && nowMs >= nextFCutMs) {
+    fCuts++; basketCuts++; totalCuts++;
+    fLastCutMs = nowMs;
+    nextFCutMs = nowMs + cutInterval();
+    const el = document.getElementById('fc-ago');
+    if (el) el.textContent = '0.0s';
+  }
+  if (faultUnit !== 'REAR' && nextRCutMs && nowMs >= nextRCutMs) {
+    rCuts++; basketCuts++; totalCuts++;
+    rLastCutMs = nowMs;
+    nextRCutMs = nowMs + cutInterval();
+    const el = document.getElementById('rc-ago');
+    if (el) el.textContent = '0.0s';
+  }
+
+  document.getElementById('fr').textContent = fCuts;
+  document.getElementById('rr').textContent = rCuts;
+  const pcEl = document.getElementById('p-cuts');
+  if (pcEl) pcEl.textContent = totalCuts.toLocaleString();
+}
+
+// ── Unit status helper ────────────────────────────
+function setUnit(unit, cls, label) {
+  const col = document.getElementById('col-'+unit);
+  const dot = document.getElementById(unit[0]+'d');
+  const lbl = document.getElementById(unit[0]+'s');
+  col.className = 'unit-card ' + cls;
+  dot.className = 'u-dot ' + cls;
+  lbl.className = 'u-status ' + cls;
+  lbl.textContent = label;
+  // inline fault info
+  const fi = document.getElementById('fault-info-' + unit);
+  if (fi) fi.classList.toggle('show', cls === 'fault');
+}
+
+// ── Cut-ago timer pause/resume ────────────────────
+// When the machine pauses (sensor off, e-stop, stop), freeze the cut-ago display.
+// When it resumes, shift fLastCutMs/rLastCutMs forward by the paused duration so
+// Date.now()-fLastCutMs gives the same elapsed time as at the moment of pause.
+function pauseCutTimer() {
+  if (cutTimerPausedAt === 0) cutTimerPausedAt = Date.now();
+}
+function resumeCutTimer() {
+  if (cutTimerPausedAt === 0) return;
+  const offset = Date.now() - cutTimerPausedAt;
+  if (fLastCutMs) fLastCutMs += offset;
+  if (rLastCutMs) rLastCutMs += offset;
+  cutTimerPausedAt = 0;
+}
+
+// ── Machine state management ──────────────────────
+function applyState() {
+  const pill     = document.getElementById('state-pill');
+  const slabel   = document.getElementById('state-label');
+  const btnStop  = document.getElementById('btn-stop');
+  const btnStart = document.getElementById('btn-start');
+  const btnResume= document.getElementById('btn-resume');
+  const btnEnd   = document.getElementById('btn-end');
+  const btnAck   = document.getElementById('btn-ack');
+  const btnNewWO = document.getElementById('btn-new-wo');
+  const aFault   = document.getElementById('a-fault');
+  const btnBasket= document.getElementById('btn-basket');
+
+  [btnStop, btnStart, btnResume, btnEnd, btnAck, btnNewWO].forEach(b => b.style.display = 'none');
+  aFault.style.display = 'none';
+  pill.className = 'state-pill ' + state;
+  slabel.textContent = state.toUpperCase();
+
+  if (state === 'running') {
+    setUnit('front', 'cutting', 'CUTTING');
+    setUnit('rear',  'cutting', 'CUTTING');
+    btnStop.style.display = '';
+    btnEnd.style.display  = '';
+    if (btnBasket) btnBasket.disabled = false;
+  } else if (state === 'idle') {
+    setUnit('front', 'ready', 'READY');
+    setUnit('rear',  'ready', 'READY');
+    const hasWO = document.getElementById('wo-num').textContent !== '—';
+    if (hasWO) {
+      // WO open — first start or resume after stop
+      btnStart.style.display    = '';
+      btnStart.textContent      = woStarted ? '▶ Resume' : '▶ Start';
+      btnEnd.style.display      = '';
+    } else {
+      // No active WO
+      btnNewWO.style.display = '';
+    }
+    if (btnBasket) btnBasket.disabled = true;
+  } else if (state === 'fault') {
+    const fu = faultUnit === 'FRONT' ? 'front' : 'rear';
+    setUnit(fu, 'fault', 'FAULT');
+    setUnit(fu === 'front' ? 'rear' : 'front', 'cutting', 'CUTTING');
+    document.getElementById('fault-msg-' + fu).textContent = 'Jam — End Sensor miss (3 attempts)';
+    btnStop.style.display = '';
+    btnEnd.style.display  = '';
+    if (btnBasket) btnBasket.disabled = true;
+  } else if (state === 'estop') {
+    setUnit('front', 'fault', 'E-STOP');
+    setUnit('rear',  'fault', 'E-STOP');
+    document.getElementById('fault-msg-front').textContent = 'E-Stop active';
+    document.getElementById('fault-msg-rear').textContent  = 'E-Stop active';
+    document.getElementById('estop-ind').className = 'safety estop-on';
+    document.getElementById('estop-banner').classList.remove('hidden');
+    btnAck.style.display = '';
+    if (btnBasket) btnBasket.disabled = true;
+  }
+}
+
+function stopMachine() {
+  pauseCutTimer();
+  state = 'idle';
+  nextFCutMs = 0; nextRCutMs = 0;
+  applyState();
+}
+function startMachine() {
+  resumeCutTimer();
+  state = 'running';
+  woStarted = true;
+  sensorOn = true;
+  document.getElementById('sensor-banner').classList.add('hidden');
+  initCutSchedule();
+  applyState();
+}
+function resumeMachine() {
+  state = 'running';
+  initCutSchedule();
+  applyState();
+}
+function ackFault() {
+  if (state === 'fault') {
+    const fu = faultUnit === 'FRONT' ? 'front' : 'rear';
+    setUnit(fu, 'ready', 'READY');   // clears overlay via setUnit
+    state = 'running';
+    document.getElementById('btn-stop').style.display = '';
+    document.getElementById('btn-end').style.display  = '';
+    document.getElementById('btn-ack').style.display  = 'none';
+    document.getElementById('a-fault').style.display  = 'none';
+    const bb = document.getElementById('btn-basket');
+    if (bb) bb.disabled = false;
+    // Flash RESUME as visual cue that WO continues
+    const br = document.getElementById('btn-resume');
+    br.style.display = '';
+    br.textContent = '▶ Resume WO';
+    document.getElementById('state-pill').className = 'state-pill running';
+    document.getElementById('state-label').textContent = 'RUNNING';
+    setTimeout(() => { br.style.display = 'none'; setUnit(fu, 'cutting', 'CUTTING'); }, 3000);
+  } else if (state === 'estop') {
+    document.getElementById('estop-banner').classList.add('hidden');
+    document.getElementById('estop-ind').className = 'safety estop-off';
+    document.getElementById('btn-ack').style.display = 'none';
+    state = 'idle';
+    setUnit('front', 'ready', 'READY');
+    setUnit('rear',  'ready', 'READY');
+    document.getElementById('state-pill').className = 'state-pill idle';
+    document.getElementById('state-label').textContent = 'IDLE';
+    applyState();
+  }
+}
+
+// ── Demo triggers ─────────────────────────────────
+function toggleSensor() {
+  if (state !== 'running') return;
+  sensorOn = !sensorOn;
+  document.getElementById('sensor-banner').classList.toggle('hidden', sensorOn);
+  if (!sensorOn) {
+    pauseCutTimer();
+    document.getElementById('col-front').className = 'unit-card paused';
+    document.getElementById('col-rear').className  = 'unit-card paused';
+    document.getElementById('fd').className = 'u-dot paused';
+    document.getElementById('rd').className = 'u-dot paused';
+    document.getElementById('fs').className = 'u-status paused'; document.getElementById('fs').textContent = 'PAUSED';
+    document.getElementById('rs').className = 'u-status paused'; document.getElementById('rs').textContent = 'PAUSED';
+  } else {
+    resumeCutTimer();
+    setUnit('front','cutting','CUTTING');
+    setUnit('rear', 'cutting','CUTTING');
+    initCutSchedule(); // reschedule from now
+  }
+}
+function triggerFault(unit) {
+  if (state === 'estop') return;
+  faultUnit = unit;
+  state = 'fault';
+  // Other unit keeps going (fault isolation)
+  const other = unit === 'FRONT' ? 'rear' : 'front';
+  setUnit(other, 'cutting', 'CUTTING');
+  applyState();
+}
+function triggerEstop() {
+  pauseCutTimer();
+  state = 'estop';
+  applyState();
+}
+
+// ── Screen nav ────────────────────────────────────
+function switchScreen(name, el) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── Detail toggle ─────────────────────────────────
+function toggleDetail(u) {
+  const det = document.getElementById(u+'d-detail');
+  const btn = document.getElementById('exp-'+u);
+  det.classList.toggle('open');
+  btn.classList.toggle('open');
+  btn.textContent = det.classList.contains('open') ? '⌃' : '⌄';
+}
+
+// ── Production tabs ───────────────────────────────
+function switchProd(tab, el) {
+  document.querySelectorAll('.prod-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.prod-panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('prod-'+tab).classList.add('active');
+}
+function filterChip(el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+
+// ── History filtering ─────────────────────────────
+function filterHistory() {
+  const filter = document.getElementById('hist-mat-filter').value;
+  document.querySelectorAll('#hist-tbody tr').forEach(row => {
+    row.style.display = (!filter || row.dataset.mat === filter) ? '' : 'none';
+  });
+}
+
+function openWODetail(row) {
+  document.getElementById('wod-title').textContent = row.dataset.wo;
+  document.getElementById('wod-sub').textContent   = row.dataset.mat;
+  document.getElementById('wod-start').textContent = row.dataset.start;
+  document.getElementById('wod-end').textContent   = row.dataset.end;
+  document.getElementById('wod-cuts').textContent  = row.dataset.cuts;
+  document.getElementById('wod-wt').textContent    = row.dataset.wt;
+  document.getElementById('wod-rt').textContent    = row.dataset.rt;
+  document.getElementById('wod-baskets').textContent = row.dataset.baskets;
+  showModal('modal-wo-detail');
+}
+
+// ── Modals ────────────────────────────────────────
+function openBasket() {
+  if (state !== 'running') return;
+  document.getElementById('mb-title').textContent = `Log Basket — #${basketNum}`;
+  document.getElementById('mb-cuts').textContent  = basketCuts;
+  document.getElementById('mb-time').textContent  = fmtSec(basketSec);
+  document.getElementById('mb-weight').value = '';
+  document.getElementById('mb-weight').classList.remove('err');
+  showModal('modal-basket');
+}
+function confirmBasket() {
+  const wtVal = parseFloat(document.getElementById('mb-weight').value) || 0;
+  const now = new Date();
+  const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  basketLog.push({ num: basketNum, cuts: basketCuts, sec: basketSec, wt: wtVal, ts });
+  if (wtVal > 0) { totalWt += wtVal; updateProdActiveWt(); }
+  // Reset shared basket counters
+  basketCuts = 0; basketSec = 0; basketNum++;
+  fCuts = 0; rCuts = 0;
+  const lbl = document.getElementById('basket-num-lbl');
+  if (lbl) lbl.textContent = basketNum;
+  renderLiveBasketList();
+  closeModal();
+}
+
+function renderLiveBasketList() {
+  const el = document.getElementById('live-basket-list');
+  if (!el) return;
+  if (basketLog.length === 0) {
+    el.innerHTML = '<div class="brow-empty">No baskets logged yet</div>';
+    return;
+  }
+  el.innerHTML = [...basketLog].reverse().map(b => `
+    <div class="brow">
+      <span class="brow-unit">#${b.num}</span>
+      <span style="font-size:11px;color:var(--text-2)">${fmtSec(b.sec)}</span>
+      <span class="brow-cuts">${b.cuts.toLocaleString()} cuts</span>
+      ${b.wt > 0 ? `<span class="brow-wt">&nbsp;${b.wt.toFixed(1)} kg</span>` : ''}
+      <span class="brow-ts">${b.ts}</span>
+    </div>`).join('');
+}
+
+function updateProdActiveWt() {
+  const el = document.getElementById('p-total-weight');
+  if (el) el.textContent = totalWt > 0 ? totalWt.toFixed(1) + ' kg' : '—';
+}
+function openEndWork() {
+  const woNum = document.getElementById('wo-num').textContent;
+  const woMat = document.getElementById('wo-mat').textContent;
+  document.getElementById('ew-sub').textContent = woNum + ' · ' + woMat;
+  document.getElementById('ew-basket-num').textContent = basketNum;
+  document.getElementById('ew-meta').textContent = `${basketCuts} cuts · ${fmtSec(basketSec)}`;
+  document.getElementById('ew-wt').value = '';
+  document.getElementById('ew-output-wt').value = '';
+  showModal('modal-endwork');
+}
+function confirmEndWork() {
+  closeModal();
+  // Clear WO so action bar returns to "New WO" state
+  document.getElementById('wo-num').textContent  = '—';
+  document.getElementById('wo-mat').textContent  = '';
+  document.getElementById('wo-time').textContent = '◷ 00:00:00';
+  const pWoTitle = document.getElementById('p-wo-title');
+  if (pWoTitle) pWoTitle.textContent = 'No active work order';
+  woStarted = false;
+  state = 'idle';
+  applyState();
+}
+function showModal(id) {
+  document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  document.getElementById('backdrop').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('backdrop').classList.remove('open');
+}
+function backdropClick(e) {
+  if (e.target === document.getElementById('backdrop')) closeModal();
+}
+
+// ── Blade Status render ───────────────────────────
+function renderBladeStatus() {
+  const limit = gSet.bladeLimit.val;
+  [{ unit: 'front', cuts: fBladeCuts }, { unit: 'rear', cuts: rBladeCuts }].forEach(({ unit, cuts }) => {
+    const pct     = Math.min(100, Math.round(cuts / limit * 100));
+    const warn    = pct >= (100 - gSet.bladeWarn.val);
+    const cls     = pct >= 90 ? 'crit' : warn ? 'warn' : 'good';
+    const fillEl  = document.getElementById('blade-fill-' + unit);
+    const metaEl  = document.getElementById('blade-meta-' + unit);
+    const pctEl   = document.getElementById('blade-pct-' + unit);
+    if (!fillEl) return;
+    fillEl.style.width  = pct + '%';
+    fillEl.className    = 'blade-fill ' + cls;
+    metaEl.textContent  = cuts.toLocaleString() + ' / ' + limit.toLocaleString() + ' cuts';
+    pctEl.className     = 'blade-pct ' + cls;
+    pctEl.textContent   = pct + '%' + (warn ? ' ⚠' : '');
+  });
+}
+
+// ── Blade Change ──────────────────────────────────
+function openBladeChange() {
+  bcUnit = 'FRONT';
+  document.getElementById('bc-front-btn').className = 'bc-unit-btn on';
+  document.getElementById('bc-rear-btn').className  = 'bc-unit-btn';
+  document.getElementById('bc-notes').value = '';
+  showModal('modal-blade-change');
+}
+function selectBCUnit(unit) {
+  bcUnit = unit;
+  document.getElementById('bc-front-btn').className = 'bc-unit-btn' + (unit === 'FRONT' ? ' on' : '');
+  document.getElementById('bc-rear-btn').className  = 'bc-unit-btn' + (unit === 'REAR'  ? ' on' : '');
+}
+function confirmBladeChange() {
+  const notes    = document.getElementById('bc-notes').value.trim();
+  const now      = new Date();
+  const months   = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ts       = `${now.getDate()} ${months[now.getMonth()]} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const cutCount = bcUnit === 'FRONT' ? fBladeCuts : rBladeCuts;
+  const row      = document.createElement('div');
+  row.className  = 'brow';
+  row.style.fontSize = '11px';
+  row.innerHTML  = `<span style="color:var(--text-3);min-width:110px">${ts}</span>`
+                 + `<span style="color:var(--cyan);min-width:44px">${bcUnit}</span>`
+                 + `<span>Changed @ ${cutCount.toLocaleString()} cuts${notes ? ' · ' + notes : ''}</span>`;
+  const logEl = document.getElementById('blade-change-log');
+  logEl.insertBefore(row, logEl.firstChild);
+  if (bcUnit === 'FRONT') fBladeCuts = 0;
+  else                    rBladeCuts = 0;
+  renderBladeStatus();
+  closeModal();
+}
+
+// ── Materials data ────────────────────────────────
+let materials = [
+  { code: 'PELD-C', name: 'PE-LD Clean',        rate: 24, ds: false },
+  { code: 'PELD-O', name: 'PE-LD w/ Organics',  rate: 18, ds: true  },
+  { code: 'PP-S',   name: 'PP Standard',         rate: 22, ds: false },
+  { code: 'EVA',    name: 'EVA Foam',            rate: 16, ds: true  },
+];
+let activeMat = 0; // index of material currently in use
+let editingMatIdx = -1; // -1 = new material
+let dsValue = false;
+
+// ── Global settings data ──────────────────────────
+const gSet = {
+  jamAttempts:    { label: 'Jam Recovery Attempts', val: 3,    unit: '',    min: 1,  max: 10,    step: 1,    decimals: 0 },
+  cutTimeout:     { label: 'Cut Timeout',           val: 800,  unit: ' ms', min: 100,max: 2000,  step: 50,   decimals: 0 },
+  retractTimeout: { label: 'Retract Timeout',       val: 1500, unit: ' ms', min: 100,max: 5000,  step: 50,   decimals: 0 },
+  bladeLimit:     { label: 'Blade Life Limit',      val: 10000,unit: '',    min: 1000,max: 50000,step: 1000, decimals: 0 },
+  bladeWarn:      { label: 'Blade Warning At',      val: 10,   unit: '%',   min: 5,  max: 30,    step: 1,    decimals: 0 },
+  basketTare:     { label: 'Basket Tare Weight',    val: 5.8,  unit: ' kg', min: 0,  max: 20,    step: 0.1,  decimals: 1 },
+};
+
+function fmtGVal(key) {
+  const s = gSet[key];
+  const v = s.decimals > 0 ? s.val.toFixed(s.decimals) : s.val.toLocaleString();
+  return v + s.unit;
+}
+
+// ── Render mat list (settings screen) ────────────
+function renderMatList() {
+  const el = document.getElementById('mat-list');
+  if (!el) return;
+  const admin = isAdmin();
+  el.innerHTML = materials.map((m, i) => `
+    <div class="mat-row${i===activeMat?' on':''}" ${admin ? `onclick="editMat(${i})"` : ''} style="${admin ? 'cursor:pointer' : 'cursor:default'}">
+      <span class="mat-code">${m.code}</span>
+      <span class="mat-name">${m.name}</span>
+      <span class="mat-rate">${m.rate} c/m</span>
+      ${m.ds ? '<span class="mat-ds">2×</span>' : ''}
+      ${i===activeMat ? '<span style="font-size:9px;color:var(--cyan);letter-spacing:1px;font-weight:700">ACTIVE</span>' : ''}
+      ${admin ? '<span style="font-size:11px;color:var(--text-3);margin-left:auto">✎</span>' : ''}
+    </div>`).join('');
+}
+
+// ── Render mat list (New WO modal) ────────────────
+function renderNwoMatList() {
+  const el = document.getElementById('nwo-mat-sel');
+  if (!el) return;
+  el.innerHTML = materials.map((m, i) =>
+    `<option value="${i}">${m.code} — ${m.name} (${m.rate} c/min${m.ds ? ', 2×' : ''})</option>`
+  ).join('');
+  el.value = '0';
+  pendingMat = { code: materials[0].code, name: materials[0].name, rate: materials[0].rate, idx: 0 };
+}
+
+// ── Render global settings rows ───────────────────
+function renderGlobalSettings() {
+  const el = document.getElementById('global-settings-rows');
+  if (!el) return;
+  const admin = isAdmin();
+  el.innerHTML = Object.keys(gSet).map(key => `
+    <div class="set-row">
+      <span class="set-lbl">${gSet[key].label}</span>
+      <span class="set-val${admin ? ' editable' : ''}" id="gsval-${key}"
+        ${admin ? `onclick="editGlobal('${key}')"` : ''}>${fmtGVal(key)}</span>
+    </div>`).join('');
+}
+
+// ── Inline edit global setting ────────────────────
+function editGlobal(key) {
+  const s = gSet[key];
+  const span = document.getElementById('gsval-' + key);
+  if (!span || span.querySelector('input')) return;
+  const inp = document.createElement('input');
+  inp.className = 'set-val-input';
+  inp.type = 'number'; inp.step = s.step; inp.min = s.min; inp.max = s.max;
+  inp.value = s.val;
+  span.innerHTML = '';
+  span.appendChild(inp);
+  inp.focus(); inp.select();
+  function save() {
+    let v = parseFloat(inp.value);
+    if (isNaN(v)) v = s.val;
+    v = Math.min(s.max, Math.max(s.min, v));
+    s.val = v;
+    span.innerHTML = fmtGVal(key);
+    if (key === 'bladeLimit' || key === 'bladeWarn') renderBladeStatus();
+  }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { save(); } if (e.key === 'Escape') { span.innerHTML = fmtGVal(key); } });
+}
+
+// ── Material modal ────────────────────────────────
+function editMat(idx) {
+  editingMatIdx = idx;
+  const m = materials[idx];
+  document.getElementById('mat-modal-title').textContent = 'Edit Material';
+  document.getElementById('mat-code').value = m.code;
+  document.getElementById('mat-name-input').value = m.name;
+  document.getElementById('mat-rate-input').value = m.rate;
+  dsValue = m.ds;
+  document.getElementById('mat-ds-track').className = 'toggle-track' + (m.ds ? ' on' : '');
+  // hide delete for active material
+  document.getElementById('mat-delete-btn').style.display = idx === activeMat ? 'none' : '';
+  showModal('modal-mat');
+}
+function openAddMat() {
+  editingMatIdx = -1;
+  document.getElementById('mat-modal-title').textContent = 'New Material';
+  document.getElementById('mat-code').value = '';
+  document.getElementById('mat-name-input').value = '';
+  document.getElementById('mat-rate-input').value = '';
+  dsValue = false;
+  document.getElementById('mat-ds-track').className = 'toggle-track';
+  document.getElementById('mat-delete-btn').style.display = 'none';
+  showModal('modal-mat');
+}
+function toggleDS() {
+  dsValue = !dsValue;
+  document.getElementById('mat-ds-track').className = 'toggle-track' + (dsValue ? ' on' : '');
+}
+function saveMaterial() {
+  const code = document.getElementById('mat-code').value.trim().toUpperCase();
+  const name = document.getElementById('mat-name-input').value.trim();
+  const rate = parseInt(document.getElementById('mat-rate-input').value) || 0;
+  if (!code || !name || rate < 1) {
+    ['mat-code','mat-name-input','mat-rate-input'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el.value.trim() || (id==='mat-rate-input' && rate<1)) el.style.borderColor = 'var(--red)';
+    });
+    return;
+  }
+  ['mat-code','mat-name-input','mat-rate-input'].forEach(id => document.getElementById(id).style.borderColor = '');
+  const mat = { code, name, rate, ds: dsValue };
+  if (editingMatIdx >= 0) {
+    materials[editingMatIdx] = mat;
+  } else {
+    materials.push(mat);
+  }
+  renderMatList();
+  renderNwoMatList();
+  closeModal();
+}
+function deleteMaterial() {
+  if (editingMatIdx < 0 || editingMatIdx === activeMat) return;
+  if (!confirm(`Delete ${materials[editingMatIdx].code}?`)) return;
+  materials.splice(editingMatIdx, 1);
+  if (activeMat > editingMatIdx) activeMat--;
+  renderMatList();
+  renderNwoMatList();
+  closeModal();
+}
+
+// ── New WO ────────────────────────────────────────
+function openNewWO() {
+  document.getElementById('nwo-num').value = '';
+  document.getElementById('nwo-num').classList.remove('err');
+  renderNwoMatList();
+  showModal('modal-newwo');
+}
+function confirmNewWO() {
+  const numEl = document.getElementById('nwo-num');
+  const woNum = numEl.value.trim() || 'WO-' + (Math.floor(Math.random()*9000)+1000);
+  const sel = document.getElementById('nwo-mat-sel');
+  const selIdx = sel ? parseInt(sel.value) : 0;
+  const m = materials[selIdx];
+  activeMat = selIdx;
+  pendingMat = { code: m.code, name: m.name, rate: m.rate, idx: selIdx };
+  // Update top bar
+  document.getElementById('wo-num').textContent = woNum;
+  document.getElementById('wo-mat').textContent = m.name;
+  document.getElementById('wo-time').textContent = '◷ 00:00:00';
+  cfgRate = m.rate;
+  document.getElementById('shared-rate').textContent = cfgRate;
+  const dsBadge = document.getElementById('ds-badge');
+  if (dsBadge) dsBadge.style.display = m.ds ? '' : 'none';
+  // Reset all counters
+  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0;
+  basketCuts = 0; basketSec = 0; basketNum = 1;
+  document.getElementById('fr').textContent = '0';
+  document.getElementById('rr').textContent = '0';
+  const lbl = document.getElementById('basket-num-lbl');
+  if (lbl) lbl.textContent = '1';
+  // Reset last-cut displays
+  const fEl = document.getElementById('fc-ago');
+  const rEl = document.getElementById('rc-ago');
+  if (fEl) fEl.textContent = '—';
+  if (rEl) rEl.textContent = '—';
+  fLastCutMs = 0; rLastCutMs = 0;
+  // Reset basket log & production screen
+  woStarted = false;
+  basketLog = []; totalWt = 0;
+  renderLiveBasketList();
+  updateProdActiveWt();
+  const pWoTitle = document.getElementById('p-wo-title');
+  if (pWoTitle) pWoTitle.textContent = woNum + ' · ' + m.name;
+  const pRun = document.getElementById('p-runtime');
+  if (pRun) pRun.textContent = '00:00:00';
+  const pBn = document.getElementById('p-basket-num');
+  if (pBn) pBn.textContent = '1';
+  const pBs = document.getElementById('p-basket-sub');
+  if (pBs) pBs.textContent = '0 cuts · 00:00:00';
+  renderMatList();
+  closeModal();
+  // Move to idle/ready — show START
+  state = 'idle';
+  applyState();
+}
+
+// ── Admin PIN ─────────────────────────────────────
+function isAdmin() { return isAdminMode; }
+
+function openAdminPin() {
+  if (isAdminMode) {
+    // Already admin — clicking chip logs out of admin mode
+    isAdminMode = false;
+    clearTimeout(adminPinTimeout);
+    updateAdminChip();
+    renderMatList();
+    renderGlobalSettings();
+    renderAirSettings();
+    const addBtn = document.getElementById('btn-add-mat');
+    if (addBtn) addBtn.style.visibility = 'hidden';
+    return;
+  }
+  pinEntry = '';
+  updatePinDots(false);
+  document.getElementById('pin-sub').textContent = 'Enter PIN to enable admin mode';
+  document.getElementById('pin-sub').style.color = '';
+  showModal('modal-pin');
+}
+
+function pinKey(k) {
+  if (k === '⌫') { pinEntry = pinEntry.slice(0, -1); updatePinDots(false); return; }
+  if (pinEntry.length >= 4) return;
+  pinEntry += k;
+  updatePinDots(false);
+  if (pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+
+function updatePinDots(err) {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('pd-' + i);
+    if (err) dot.className = 'pin-dot err';
+    else dot.className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '');
+  }
+}
+
+function checkPin() {
+  if (pinEntry === ADMIN_PIN) {
+    isAdminMode = true;
+    updateAdminChip();
+    renderMatList();
+    renderGlobalSettings();
+    renderAirSettings();
+    const addBtn = document.getElementById('btn-add-mat');
+    if (addBtn) addBtn.style.visibility = '';
+    closeModal();
+    clearTimeout(adminPinTimeout);
+    adminPinTimeout = setTimeout(() => {
+      isAdminMode = false;
+      updateAdminChip();
+      renderMatList();
+      renderGlobalSettings();
+      renderAirSettings();
+      const btn = document.getElementById('btn-add-mat');
+      if (btn) btn.style.visibility = 'hidden';
+    }, 15 * 60 * 1000);
+  } else {
+    updatePinDots(true);
+    document.getElementById('pin-sub').textContent = 'Incorrect PIN';
+    document.getElementById('pin-sub').style.color = 'var(--red)';
+    setTimeout(() => { pinEntry = ''; updatePinDots(false); }, 1200);
+  }
+}
+
+function updateAdminChip() {
+  const icon  = document.getElementById('admin-icon');
+  const label = document.getElementById('admin-label');
+  const chip  = document.getElementById('admin-chip');
+  if (isAdminMode) {
+    icon.textContent  = '🔓';
+    label.textContent = 'ADMIN';
+    chip.style.borderColor = 'rgba(0,200,240,0.4)';
+    chip.style.color = 'var(--cyan)';
+  } else {
+    icon.textContent  = '🔒';
+    label.textContent = 'OPERATOR';
+    chip.style.borderColor = '';
+    chip.style.color = '';
+  }
+}
+
+// ── Rate edit ─────────────────────────────────────
+function openRateEdit() {
+  document.getElementById('rate-input').value = cfgRate;
+  document.getElementById('rate-input').classList.remove('err');
+  showModal('modal-rate');
+}
+function confirmRateEdit() {
+  const v = parseInt(document.getElementById('rate-input').value);
+  if (!v || v < 1 || v > 60) { document.getElementById('rate-input').classList.add('err'); return; }
+  cfgRate = v;
+  document.getElementById('shared-rate').textContent = cfgRate;
+  // Reschedule cuts immediately with new rate
+  if (state === 'running') initCutSchedule();
+  closeModal();
+}
+
+// ── Demo reset ────────────────────────────────────
+function demoNewWO() {
+  state = 'idle'; faultUnit = ''; sensorOn = true; woStarted = false;
+  document.getElementById('sensor-banner').classList.add('hidden');
+  document.getElementById('estop-banner').classList.add('hidden');
+  document.getElementById('estop-ind').className = 'safety estop-off';
+  // Clear inline fault info for both units
+  ['front','rear'].forEach(u => {
+    const fi = document.getElementById('fault-info-' + u);
+    if (fi) fi.classList.remove('show');
+  });
+  document.getElementById('wo-num').textContent = '—';
+  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0;
+  basketCuts = 0; basketSec = 0; basketNum = 1;
+  const lbl = document.getElementById('basket-num-lbl');
+  if (lbl) lbl.textContent = '1';
+  applyState();
+}
+
+// ── Manual cuts ───────────────────────────────────
+function manualCut(u) {
+  if (u === 'f') { mFront++; document.getElementById('m-f-count').textContent = `Today: ${mFront} cuts`; }
+  else           { mRear++;  document.getElementById('m-r-count').textContent = `Today: ${mRear} cuts`; }
+}
+
+// ── Air Unit Settings ─────────────────────────────
+function renderAirSettings() {
+  const admin = isAdmin();
+  const actEl = document.getElementById('air-active-val');
+  const delEl = document.getElementById('air-delay-val');
+  const pulEl = document.getElementById('air-pulse-val');
+  if (actEl) {
+    actEl.textContent = airCfg.active ? 'ON' : 'OFF';
+    actEl.style.color = airCfg.active ? 'var(--green)' : 'var(--text-3)';
+    actEl.className   = 'set-val' + (admin ? ' editable' : '');
+    actEl.onclick     = admin ? toggleAirActive : null;
+  }
+  if (delEl) {
+    if (!delEl.querySelector('input')) delEl.textContent = airCfg.delay.toFixed(1) + ' s';
+    delEl.className = 'set-val' + (admin ? ' editable' : '');
+    delEl.onclick   = admin ? () => editAirSetting('delay') : null;
+  }
+  if (pulEl) {
+    if (!pulEl.querySelector('input')) pulEl.textContent = airCfg.pulse.toFixed(1) + ' s';
+    pulEl.className = 'set-val' + (admin ? ' editable' : '');
+    pulEl.onclick   = admin ? () => editAirSetting('pulse') : null;
+  }
+}
+function toggleAirActive() {
+  if (!isAdmin()) return;
+  airCfg.active = !airCfg.active;
+  renderAirSettings();
+}
+function editAirSetting(key) {
+  if (!isAdmin()) return;
+  const idMap = { delay: 'air-delay-val', pulse: 'air-pulse-val' };
+  const span  = document.getElementById(idMap[key]);
+  if (!span || span.querySelector('input')) return;
+  const limits = { delay: { min: 0, max: 10, step: 0.1 }, pulse: { min: 0.1, max: 5, step: 0.1 } };
+  const c = limits[key];
+  const inp = document.createElement('input');
+  inp.className = 'set-val-input'; inp.type = 'number';
+  inp.step = c.step; inp.min = c.min; inp.max = c.max; inp.value = airCfg[key];
+  span.innerHTML = ''; span.appendChild(inp);
+  inp.focus(); inp.select();
+  function save() {
+    let v = parseFloat(inp.value);
+    if (isNaN(v)) v = airCfg[key];
+    airCfg[key] = Math.min(c.max, Math.max(c.min, v));
+    renderAirSettings();
+  }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') renderAirSettings(); });
+}
+
+// ── Theme toggle ──────────────────────────────────
+let lightTheme = true;
+function toggleTheme() {
+  lightTheme = !lightTheme;
+  document.documentElement.classList.toggle('light', lightTheme);
+  document.getElementById('theme-btn').textContent = lightTheme ? '🌙' : '☀';
+  document.getElementById('theme-btn').title = lightTheme ? 'Switch to dark theme' : 'Switch to light theme';
+}
+
+// ── Init ──────────────────────────────────────────
+setInterval(tick, 1000);
+setInterval(simTick, 200); // check every 200ms for precise cut timing
+tick();
+applyState();
+renderMatList();
+renderGlobalSettings();
+renderAirSettings();
+renderBladeStatus();
+renderNwoMatList();
+renderLiveBasketList();
+// init + Add visibility
+const _addBtn = document.getElementById('btn-add-mat');
+if (_addBtn) _addBtn.style.visibility = isAdmin() ? '' : 'hidden';
+// Apply default light theme
+document.documentElement.classList.add('light');
+document.getElementById('theme-btn').textContent = '🌙';
+document.getElementById('theme-btn').title = 'Switch to dark theme';
+</script>
+</body>
+</html>
