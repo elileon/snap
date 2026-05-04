@@ -471,7 +471,7 @@
 
     /* ── NAV BAR (vertical left) ─────────────── */
     .nav-bar {
-      width: 72px; background: #050810;
+      width: 92px; background: #050810;
       border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0;
     }
     .nav-item {
@@ -746,9 +746,9 @@
 
     /* End Work modal */
     .ew-units { display: flex; gap: 10px; margin-bottom: 18px; }
-    .ew-unit { flex: 1; background: var(--surface); border: 1px solid var(--border-hi); border-radius: 8px; padding: 11px 12px; }
-    .ew-unit-name { font-size: 9px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 8px; text-transform: uppercase; }
-    .ew-meta { font-family: var(--font-mono); font-size: 10px; color: var(--text-3); margin-bottom: 8px; }
+    .ew-unit { flex: 1; background: var(--surface); border: 1px solid var(--border-hi); border-radius: 8px; padding: 14px 16px; }
+    .ew-unit-name { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 10px; text-transform: uppercase; }
+    .ew-meta { font-family: var(--font-mono); font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
 
     /* ── KEYFRAMES ───────────────────────────── */
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
@@ -965,19 +965,11 @@
       <div class="manual-body">
         <div class="manual-unit">
           <div class="manual-unit-name">Front</div>
-          <div class="blade-pos">
-            <span class="blade-pos-lbl">BLADE</span>
-            <span class="blade-pos-val">HOME ●</span>
-          </div>
           <button class="btn-cut" onclick="manualCut('f')">CUT</button>
         </div>
         <div class="col-divider" style="margin:20px 0"></div>
         <div class="manual-unit">
           <div class="manual-unit-name">Rear</div>
-          <div class="blade-pos">
-            <span class="blade-pos-lbl">BLADE</span>
-            <span class="blade-pos-val">HOME ●</span>
-          </div>
           <button class="btn-cut" onclick="manualCut('r')">CUT</button>
         </div>
       </div>
