@@ -334,7 +334,7 @@
     /* hide metric when fault, show fault info */
     .unit-card.fault .uc-metric { display: none; }
 
-    /* Zone 2 — Cut Rate row */
+    /* Zone 2 — Cut Cycle row */
     .run-rate-row {
       height: 68px; flex-shrink: 0; display: flex; align-items: center;
       justify-content: center;
@@ -1019,12 +1019,12 @@
         </div>
       </div>
 
-      <!-- Zone 2 — Cut Rate row -->
+      <!-- Zone 2 — Cut Cycle row -->
       <div class="run-rate-row" onclick="openRateEdit()">
         <div class="rate-ctrl-info">
-          <span class="rate-ctrl-lbl">Cut Rate</span>
+          <span class="rate-ctrl-lbl">Cut Cycle</span>
           <span class="rate-ctrl-num" id="shared-rate">24</span>
-          <span class="rate-ctrl-unit">c / min</span>
+          <span class="rate-ctrl-unit">cyc / min</span>
           <span class="ds-badge" id="ds-badge" style="display:none">2×</span>
         </div>
       </div>
@@ -1359,12 +1359,12 @@
         </div>
       </div>
 
-      <!-- Cut Rate edit modal -->
+      <!-- Cut Cycle edit modal -->
       <div class="modal" id="modal-rate" style="display:none;min-width:280px">
-        <div class="modal-title">Cut Rate</div>
+        <div class="modal-title">Cut Cycle</div>
         <div class="modal-sub">Target cuts per minute for active WO</div>
         <div class="modal-field">
-          <div class="modal-lbl">Rate (c / min)</div>
+          <div class="modal-lbl">Cycle (c / min)</div>
           <input class="modal-input" id="rate-input" type="number" placeholder="24" min="1" max="60" step="1" style="font-size:36px;letter-spacing:-1px">
         </div>
         <div class="modal-actions">
@@ -1383,7 +1383,7 @@
             <input class="modal-input" id="mat-code" type="text" placeholder="PELD-C" maxlength="8" style="font-size:16px;letter-spacing:3px">
           </div>
           <div class="modal-field">
-            <div class="modal-lbl">Cut Rate (c/min)</div>
+            <div class="modal-lbl">Cut Cycle (c/min)</div>
             <input class="modal-input" id="mat-rate-input" type="number" placeholder="24" min="1" max="60" step="1" style="font-size:18px">
           </div>
           <div class="modal-field" style="grid-column:1/-1">
@@ -2018,7 +2018,7 @@ function renderMatList() {
     <div class="mat-row${i===activeMat?' on':''}" ${admin ? `onclick="editMat(${i})"` : ''} style="${admin ? 'cursor:pointer' : 'cursor:default'}">
       <span class="mat-code">${m.code}</span>
       <span class="mat-name">${m.name}</span>
-      <span class="mat-rate">${m.rate} c/m</span>
+      <span class="mat-rate">${m.rate} cyc/m</span>
       ${m.ds ? '<span class="mat-ds">2×</span>' : ''}
       ${i===activeMat ? '<span style="font-size:9px;color:var(--cyan);letter-spacing:1px;font-weight:700">ACTIVE</span>' : ''}
       ${admin ? '<span style="font-size:11px;color:var(--text-3);margin-left:auto">✎</span>' : ''}
@@ -2030,7 +2030,7 @@ function renderNwoMatList() {
   const el = document.getElementById('nwo-mat-sel');
   if (!el) return;
   el.innerHTML = materials.map((m, i) =>
-    `<option value="${i}">${m.code} — ${m.name} (${m.rate} c/min${m.ds ? ', 2×' : ''})</option>`
+    `<option value="${i}">${m.code} — ${m.name} (${m.rate} cyc/min${m.ds ? ', 2×' : ''})</option>`
   ).join('');
   el.value = '0';
   pendingMat = { code: materials[0].code, name: materials[0].name, rate: materials[0].rate, idx: 0 };
