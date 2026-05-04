@@ -1024,7 +1024,7 @@
         <div class="rate-ctrl-info">
           <span class="rate-ctrl-lbl">Cut Cycle</span>
           <span class="rate-ctrl-num" id="shared-rate">24</span>
-          <span class="rate-ctrl-unit">cyc / min</span>
+          <span class="rate-ctrl-unit">c / min</span>
           <span class="ds-badge" id="ds-badge" style="display:none">2×</span>
         </div>
       </div>
@@ -1526,8 +1526,8 @@ function tick() {
   const pBs = document.getElementById('p-basket-sub');
   if (pBs) pBs.textContent = basketCuts.toLocaleString() + ' cuts · ' + fmtSec(basketSec);
 
-  // Basket weigh reminder — neutral animation after 200 cuts in current basket
-  const WEIGH_THRESHOLD = 200;
+  // Basket weigh reminder — neutral animation after configured cut count
+  const WEIGH_THRESHOLD = gSet.basketRemind.val;
   const bb = document.getElementById('btn-basket');
   const wb = document.getElementById('weigh-badge');
   const shouldRemind = basketCuts >= WEIGH_THRESHOLD && state !== 'idle';
@@ -1965,7 +1965,7 @@ function confirmBladeChange() {
 
 // ── Sim: trigger weigh reminder ───────────────────
 function triggerWeighRemind() {
-  basketCuts = 200; // threshold to show the reminder immediately
+  basketCuts = gSet.basketRemind.val; // set to threshold to show reminder immediately
 }
 
 // ── Filter Change ─────────────────────────────────
@@ -1996,11 +1996,12 @@ let dsValue = false;
 
 // ── Global settings data ──────────────────────────
 const gSet = {
-  cutTimeout:     { label: 'Cut Timeout',           val: 800,  unit: ' ms', min: 100,max: 2000,  step: 50,   decimals: 0 },
-  retractTimeout: { label: 'Retract Timeout',       val: 1500, unit: ' ms', min: 100,max: 5000,  step: 50,   decimals: 0 },
-  bladeLimit:     { label: 'Blade Life Limit',      val: 10000,unit: '',    min: 1000,max: 50000,step: 1000, decimals: 0 },
-  bladeWarn:      { label: 'Blade Warning At',      val: 10,   unit: '%',   min: 5,  max: 30,    step: 1,    decimals: 0 },
-  basketTare:     { label: 'Basket Tare Weight',    val: 5.8,  unit: ' kg', min: 0,  max: 20,    step: 0.1,  decimals: 1 },
+  cutTimeout:     { label: 'Cut Timeout',             val: 800,  unit: ' ms',   min: 100, max: 2000,  step: 50,   decimals: 0 },
+  retractTimeout: { label: 'Retract Timeout',         val: 1500, unit: ' ms',   min: 100, max: 5000,  step: 50,   decimals: 0 },
+  bladeLimit:     { label: 'Blade Life Limit',        val: 10000,unit: ' cuts', min: 1000,max: 50000, step: 1000, decimals: 0 },
+  bladeWarn:      { label: 'Blade Warning At',        val: 10,   unit: '%',     min: 5,   max: 30,    step: 1,    decimals: 0 },
+  basketTare:     { label: 'Basket Tare Weight',      val: 5.8,  unit: ' kg',   min: 0,   max: 20,    step: 0.1,  decimals: 1 },
+  basketRemind:   { label: 'Basket Weigh Reminder',  val: 200,  unit: ' cuts', min: 50,  max: 2000,  step: 50,   decimals: 0 },
 };
 
 function fmtGVal(key) {
@@ -2018,7 +2019,7 @@ function renderMatList() {
     <div class="mat-row${i===activeMat?' on':''}" ${admin ? `onclick="editMat(${i})"` : ''} style="${admin ? 'cursor:pointer' : 'cursor:default'}">
       <span class="mat-code">${m.code}</span>
       <span class="mat-name">${m.name}</span>
-      <span class="mat-rate">${m.rate} cyc/m</span>
+      <span class="mat-rate">${m.rate} c/m</span>
       ${m.ds ? '<span class="mat-ds">2×</span>' : ''}
       ${i===activeMat ? '<span style="font-size:9px;color:var(--cyan);letter-spacing:1px;font-weight:700">ACTIVE</span>' : ''}
       ${admin ? '<span style="font-size:11px;color:var(--text-3);margin-left:auto">✎</span>' : ''}
@@ -2030,7 +2031,7 @@ function renderNwoMatList() {
   const el = document.getElementById('nwo-mat-sel');
   if (!el) return;
   el.innerHTML = materials.map((m, i) =>
-    `<option value="${i}">${m.code} — ${m.name} (${m.rate} cyc/min${m.ds ? ', 2×' : ''})</option>`
+    `<option value="${i}">${m.code} — ${m.name} (${m.rate} c/min${m.ds ? ', 2×' : ''})</option>`
   ).join('');
   el.value = '0';
   pendingMat = { code: materials[0].code, name: materials[0].name, rate: materials[0].rate, idx: 0 };
