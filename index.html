@@ -768,33 +768,56 @@
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
     @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:0} }
 
-    /* Basket weigh reminder — neutral cyan breath (not an alarm) */
+    /* ── Basket weigh reminder — breathe-scale animation ─────── */
+    /* Button breathes: light cyan (rest) → deep blue (peak) → back.
+       Bell inside rings at the peak of each breath cycle.
+       No elements outside the button — fully self-contained. */
     @keyframes basket-breathe {
-      0%,100% { box-shadow: 0 0 0 0 rgba(0,200,240,0); border-color: rgba(0,200,240,0.32); }
-      50%      { box-shadow: 0 0 18px 4px rgba(0,200,240,0.30); border-color: rgba(0,200,240,0.9); }
+      0%, 100% {
+        transform: scale(1);
+        background: var(--cyan-dim);
+        border-color: rgba(0,200,240,0.32);
+        color: var(--cyan);
+        box-shadow: none;
+      }
+      50% {
+        transform: scale(1.028);
+        background: rgba(10,70,180,0.52);
+        border-color: rgba(60,150,255,0.95);
+        color: #ffffff;
+        box-shadow: 0 0 32px rgba(20,100,240,0.50), inset 0 0 18px rgba(0,60,180,0.30);
+      }
     }
-    @keyframes scale-rock {
-      0%,100% { transform: rotate(-6deg); }
-      50%      { transform: rotate( 6deg); }
+    /* Bell swings into peak then settles — timed to match breathe cycle */
+    @keyframes bell-ring {
+      0%,38%,100% { transform: rotate(0deg) scale(1); }
+      44%  { transform: rotate(-20deg) scale(1.15); }
+      51%  { transform: rotate( 18deg) scale(1.10); }
+      57%  { transform: rotate(-11deg) scale(1.05); }
+      63%  { transform: rotate(  8deg); }
+      69%  { transform: rotate( -4deg); }
+      75%  { transform: rotate(  2deg); }
+      80%  { transform: rotate(  0deg); }
     }
     .btn-basket-main.weigh-remind {
-      animation: basket-breathe 2.4s ease-in-out infinite;
+      animation: basket-breathe 2.6s ease-in-out infinite;
+      transition: none;
     }
     html.light .btn-basket-main.weigh-remind {
-      animation: basket-breathe 2.4s ease-in-out infinite;
+      animation: basket-breathe 2.6s ease-in-out infinite;
     }
-    .weigh-badge {
-      display: none; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 700; letter-spacing: 1.5px;
-      color: var(--cyan); opacity: 0.85;
-      margin-left: 14px; flex-shrink: 0;
+    /* Bell icon inside button — hidden until reminder active */
+    .basket-bell {
+      display: none; font-size: 20px;
+      margin-right: 10px; vertical-align: middle;
+      transform-origin: 50% 0%;
     }
-    .weigh-badge.show { display: flex; }
-    .weigh-badge .wb-icon {
+    .btn-basket-main.weigh-remind .basket-bell {
       display: inline-block;
-      animation: scale-rock 1.8s ease-in-out infinite;
-      font-size: 18px; transform-origin: center bottom;
+      animation: bell-ring 2.6s ease-in-out infinite;
     }
+    /* Hide external badge (no longer used) */
+    .weigh-badge { display: none !important; }
 
     /* Sensor health — single-row-per-unit layout */
     .sensor-row {
@@ -807,10 +830,11 @@
       font-size: 10px; font-weight: 700; letter-spacing: 2px;
       color: var(--cyan); text-transform: uppercase; min-width: 38px;
     }
-    .sensor-pair { display: flex; gap: 16px; flex: 1; }
+    .sensor-pair { display: flex; align-items: center; gap: 14px; flex: 1; }
     .sensor-pip  { display: flex; align-items: center; gap: 5px; }
     .s-pip-name  { font-size: 12px; font-weight: 600; color: var(--text-2); }
     .s-ok-lbl    { font-size: 10px; font-weight: 700; color: var(--green); margin-left: 2px; }
+    .sensor-sep  { color: var(--border-hi); font-size: 14px; font-weight: 300; user-select: none; }
 
     /* Filter log */
     .filter-log-list { display: flex; flex-direction: column; gap: 5px; }
@@ -1007,8 +1031,7 @@
 
       <!-- Zone 3 — Log Basket row -->
       <div class="run-basket-row">
-        <button class="btn-basket-main" id="btn-basket" onclick="openBasket()">⊞ Log Basket — #<span id="basket-num-lbl">1</span></button>
-        <div class="weigh-badge" id="weigh-badge"><span class="wb-icon">⚖</span>Weigh Basket</div>
+        <button class="btn-basket-main" id="btn-basket" onclick="openBasket()"><span class="basket-bell">🔔</span>⊞ Log Basket — #<span id="basket-num-lbl">1</span></button>
       </div>
 
       <!-- Zone 4 — Action buttons (END WORK / STOP) -->
@@ -1156,6 +1179,7 @@
             <span class="sensor-row-lbl">Front</span>
             <div class="sensor-pair">
               <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">Home</span><span class="s-ok-lbl">OK</span></div>
+              <span class="sensor-sep">|</span>
               <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">End</span><span class="s-ok-lbl">OK</span></div>
             </div>
           </div>
@@ -1163,6 +1187,7 @@
             <span class="sensor-row-lbl">Rear</span>
             <div class="sensor-pair">
               <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">Home</span><span class="s-ok-lbl">OK</span></div>
+              <span class="sensor-sep">|</span>
               <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">End</span><span class="s-ok-lbl">OK</span></div>
             </div>
           </div>
