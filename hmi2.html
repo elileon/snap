@@ -750,9 +750,67 @@
     .ew-unit-name { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 10px; text-transform: uppercase; }
     .ew-meta { font-family: var(--font-mono); font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
 
+    /* End Work modal — 40% larger fonts throughout */
+    #modal-endwork .modal-title   { font-size: 28px; }
+    #modal-endwork .modal-sub     { font-size: 18px; margin-bottom: 28px; }
+    #modal-endwork .ew-unit-name  { font-size: 17px; letter-spacing: 2px; }
+    #modal-endwork .ew-meta       { font-size: 18px; }
+    #modal-endwork .modal-lbl     { font-size: 15px; letter-spacing: 1.5px; margin-bottom: 10px; }
+    #modal-endwork .modal-lbl span { font-size: 12px !important; }
+    #modal-endwork .modal-input   { font-size: 30px; padding: 14px 18px; }
+    #modal-endwork .mmeta-lbl     { font-size: 13px; letter-spacing: 1px; }
+    #modal-endwork .mmeta-val     { font-size: 24px; }
+    #modal-endwork .modal-cancel  { font-size: 17px; padding: 14px 28px; }
+    #modal-endwork .modal-confirm { font-size: 17px; padding: 14px 32px; }
+    #modal-endwork               { min-width: 520px; }
+
     /* ── KEYFRAMES ───────────────────────────── */
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
     @keyframes blink     { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Basket weigh reminder — neutral cyan breath (not an alarm) */
+    @keyframes basket-breathe {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,200,240,0); border-color: rgba(0,200,240,0.32); }
+      50%      { box-shadow: 0 0 18px 4px rgba(0,200,240,0.30); border-color: rgba(0,200,240,0.9); }
+    }
+    @keyframes scale-rock {
+      0%,100% { transform: rotate(-6deg); }
+      50%      { transform: rotate( 6deg); }
+    }
+    .btn-basket-main.weigh-remind {
+      animation: basket-breathe 2.4s ease-in-out infinite;
+    }
+    html.light .btn-basket-main.weigh-remind {
+      animation: basket-breathe 2.4s ease-in-out infinite;
+    }
+    .weigh-badge {
+      display: none; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 700; letter-spacing: 1.5px;
+      color: var(--cyan); opacity: 0.85;
+      margin-left: 14px; flex-shrink: 0;
+    }
+    .weigh-badge.show { display: flex; }
+    .weigh-badge .wb-icon {
+      display: inline-block;
+      animation: scale-rock 1.8s ease-in-out infinite;
+      font-size: 18px; transform-origin: center bottom;
+    }
+
+    /* Sensor health — unit-grouped layout */
+    .sensor-unit-group { margin-bottom: 10px; }
+    .sensor-unit-group:last-child { margin-bottom: 0; }
+    .sensor-unit-hdr {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      color: var(--cyan); text-transform: uppercase;
+      margin-bottom: 5px; padding: 0 2px;
+    }
+    .sensor-unit-rows { display: flex; flex-direction: column; gap: 4px; }
+
+    /* Filter log */
+    .filter-log-list { display: flex; flex-direction: column; gap: 5px; }
+    .flog-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .flog-ts   { font-family: var(--font-mono); font-size: 12px; color: var(--text-3); min-width: 110px; }
+    .flog-desc { color: var(--text-2); }
 
     /* ── SCROLLBAR ───────────────────────────── */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -944,6 +1002,7 @@
       <!-- Zone 3 — Log Basket row -->
       <div class="run-basket-row">
         <button class="btn-basket-main" id="btn-basket" onclick="openBasket()">⊞ Log Basket — #<span id="basket-num-lbl">1</span></button>
+        <div class="weigh-badge" id="weigh-badge"><span class="wb-icon">⚖</span>Weigh Basket</div>
       </div>
 
       <!-- Zone 4 — Action buttons (END WORK / STOP) -->
@@ -1087,11 +1146,28 @@
       <div class="mc mc-r">
         <div class="mcard">
           <div class="mcard-title">Sensor Health</div>
-          <div class="sensor-grid">
-            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div><div class="s-unit">FRONT</div></div><div class="s-ok-lbl">OK</div></div>
-            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div><div class="s-unit">FRONT</div></div><div class="s-ok-lbl">OK</div></div>
-            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div><div class="s-unit">REAR</div></div><div class="s-ok-lbl">OK</div></div>
-            <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div><div class="s-unit">REAR</div></div><div class="s-ok-lbl">OK</div></div>
+          <div class="sensor-unit-group">
+            <div class="sensor-unit-hdr">Front Unit</div>
+            <div class="sensor-unit-rows">
+              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+            </div>
+          </div>
+          <div class="sensor-unit-group">
+            <div class="sensor-unit-hdr">Rear Unit</div>
+            <div class="sensor-unit-rows">
+              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="mcard" style="flex:1">
+          <div class="mcard-title" style="display:flex;align-items:center;justify-content:space-between">
+            Filter Change Log
+            <button class="btn-log-blade" onclick="openFilterChange()">⊞ Log Change</button>
+          </div>
+          <div class="filter-log-list" id="filter-change-log">
+            <div class="flog-row"><span class="flog-ts">01 May 08:30</span><span class="flog-desc">Recycling machine filter replaced</span></div>
           </div>
         </div>
         <div class="mcard">
@@ -1168,7 +1244,7 @@
           <div class="mmeta"><div class="mmeta-lbl">Runtime</div><div class="mmeta-val" id="mb-time">00:00:00</div></div>
         </div>
         <div class="modal-field">
-          <div class="modal-lbl">Rejects Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
           <input class="modal-input" id="mb-weight" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="letter-spacing:0">
         </div>
         <div class="modal-actions">
@@ -1185,7 +1261,7 @@
           <div class="ew-unit-name">Final Basket — #<span id="ew-basket-num">1</span></div>
           <div class="ew-meta" id="ew-meta">0 cuts · 00:00:00</div>
           <div class="modal-field" style="margin-bottom:0">
-            <div class="modal-lbl">Rejects Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+            <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
             <input class="modal-input" id="ew-wt" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="font-size:14px;padding:7px 12px;letter-spacing:0">
           </div>
         </div>
@@ -1416,6 +1492,14 @@ function tick() {
   if (pBn) pBn.textContent = basketNum;
   const pBs = document.getElementById('p-basket-sub');
   if (pBs) pBs.textContent = basketCuts.toLocaleString() + ' cuts · ' + fmtSec(basketSec);
+
+  // Basket weigh reminder — neutral animation after 200 cuts in current basket
+  const WEIGH_THRESHOLD = 200;
+  const bb = document.getElementById('btn-basket');
+  const wb = document.getElementById('weigh-badge');
+  const shouldRemind = basketCuts >= WEIGH_THRESHOLD && state !== 'idle';
+  if (bb) bb.classList.toggle('weigh-remind', shouldRemind);
+  if (wb) wb.classList.toggle('show', shouldRemind);
 }
 
 function fmtSec(s) {
@@ -1448,19 +1532,20 @@ function initCutSchedule() {
   nextRCutMs = Date.now() + iv * (0.8 + Math.random() * 0.4);
 }
 
+let simTickCount = 0;
 function simTick() {
   if (state !== 'running' || !sensorOn) return;
   const nowMs = Date.now();
 
   if (faultUnit !== 'FRONT' && nextFCutMs && nowMs >= nextFCutMs) {
-    fCuts++; basketCuts++; totalCuts++;
+    fCuts++; basketCuts++; totalCuts++; fBladeCuts++;
     fLastCutMs = nowMs;
     nextFCutMs = nowMs + cutInterval();
     const el = document.getElementById('fc-ago');
     if (el) el.textContent = '0.0s';
   }
   if (faultUnit !== 'REAR' && nextRCutMs && nowMs >= nextRCutMs) {
-    rCuts++; basketCuts++; totalCuts++;
+    rCuts++; basketCuts++; totalCuts++; rBladeCuts++;
     rLastCutMs = nowMs;
     nextRCutMs = nowMs + cutInterval();
     const el = document.getElementById('rc-ago');
@@ -1471,6 +1556,10 @@ function simTick() {
   document.getElementById('rr').textContent = rCuts;
   const pcEl = document.getElementById('p-cuts');
   if (pcEl) pcEl.textContent = totalCuts.toLocaleString();
+
+  // Refresh blade status every ~5 s (25 ticks × 200 ms)
+  simTickCount++;
+  if (simTickCount % 25 === 0) renderBladeStatus();
 }
 
 // ── Unit status helper ────────────────────────────
@@ -1841,6 +1930,18 @@ function confirmBladeChange() {
   closeModal();
 }
 
+// ── Filter Change ─────────────────────────────────
+function openFilterChange() {
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date();
+  const ts = `${now.getDate()} ${months[now.getMonth()]} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const row = document.createElement('div');
+  row.className = 'flog-row';
+  row.innerHTML = `<span class="flog-ts">${ts}</span><span class="flog-desc">Recycling machine filter replaced</span>`;
+  const logEl = document.getElementById('filter-change-log');
+  if (logEl) logEl.insertBefore(row, logEl.firstChild);
+}
+
 // ── Materials data ────────────────────────────────
 let materials = [
   { code: 'PELD-C', name: 'PE-LD Clean',        rate: 24, ds: false },
@@ -1854,7 +1955,6 @@ let dsValue = false;
 
 // ── Global settings data ──────────────────────────
 const gSet = {
-  jamAttempts:    { label: 'Jam Recovery Attempts', val: 3,    unit: '',    min: 1,  max: 10,    step: 1,    decimals: 0 },
   cutTimeout:     { label: 'Cut Timeout',           val: 800,  unit: ' ms', min: 100,max: 2000,  step: 50,   decimals: 0 },
   retractTimeout: { label: 'Retract Timeout',       val: 1500, unit: ' ms', min: 100,max: 5000,  step: 50,   decimals: 0 },
   bladeLimit:     { label: 'Blade Life Limit',      val: 10000,unit: '',    min: 1000,max: 50000,step: 1000, decimals: 0 },
