@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SNAP·CUT — Concept B: "The Output is the Hero"
+  A small cylinder stub feeds from top. A large clean sphere dominates the bottom.
+  The blade between them is the snap-cut action.
+  Story emphasis: precision input → clean precision pellet output.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+<defs>
+  <!-- Cylinder stub: narrow, textured with cylindrical gradient -->
+  <linearGradient id="cyl-b" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#050E1C"/>
+    <stop offset="22%"  stop-color="#112438"/>
+    <stop offset="50%"  stop-color="#1C3E5A"/>
+    <stop offset="78%"  stop-color="#112438"/>
+    <stop offset="100%" stop-color="#050E1C"/>
+  </linearGradient>
+  <radialGradient id="cyl-cap-b" cx="40%" cy="35%" r="62%">
+    <stop offset="0%"   stop-color="#1E3E5A"/>
+    <stop offset="100%" stop-color="#08182A"/>
+  </radialGradient>
+
+  <!-- Large sphere: the hero output pellet -->
+  <radialGradient id="sph-b" cx="30%" cy="24%" r="70%">
+    <stop offset="0%"   stop-color="#2A5070"/>
+    <stop offset="35%"  stop-color="#142C48"/>
+    <stop offset="72%"  stop-color="#0A1C30"/>
+    <stop offset="100%" stop-color="#050E1C"/>
+  </radialGradient>
+  <!-- Rim highlight on sphere: a thin bright arc at cut face top -->
+  <radialGradient id="sphere-rim" cx="50%" cy="0%" r="55%">
+    <stop offset="0%"   stop-color="#2A5878" stop-opacity="1"/>
+    <stop offset="100%" stop-color="#0A1E32" stop-opacity="0"/>
+  </radialGradient>
+
+  <!-- Blade: same metallic steel -->
+  <linearGradient id="blade-b" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#4E5F6E"/>
+    <stop offset="28%"  stop-color="#92B2C6"/>
+    <stop offset="52%"  stop-color="#C2D8EA"/>
+    <stop offset="76%"  stop-color="#74929E"/>
+    <stop offset="100%" stop-color="#3E505C"/>
+  </linearGradient>
+  <linearGradient id="blade-dim-b" x1="100%" y1="0%" x2="0%" y2="0%">
+    <stop offset="0%"   stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.30)"/>
+  </linearGradient>
+
+  <clipPath id="badge-b"><circle cx="76" cy="80" r="56"/></clipPath>
+  <clipPath id="sphere-top-b"><rect x="10" y="62" width="132" height="80"/></clipPath>
+
+  <filter id="tg-b" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+</defs>
+
+<!--
+  Cylinder stub: x=48–104 (56 px = 50%), y=20–62
+  Blade: y=62–70, tip from right at x=64 (into cylinder 71%)
+  Large sphere: cx=76 cy=99 r=34  (99+34=133, badge 136 ✓, dist from badge ctr=19, 19+34=53<56 ✓)
+  Gap (the "drop"): blade bottom (y≈70) to sphere top (y=65) → sphere already under blade
+-->
+<circle cx="76" cy="84" r="56" fill="rgba(0,0,0,0.22)"/>
+<circle cx="76" cy="80" r="56" fill="#07101C"/>
+
+<g clip-path="url(#badge-b)">
+
+  <!-- ① CYLINDER STUB — input material, top-center, narrow -->
+  <rect x="48" y="20" width="56" height="43" fill="url(#cyl-b)"/>
+  <line x1="48"  y1="20" x2="48"  y2="63" stroke="#030912" stroke-width="1.8"/>
+  <line x1="104" y1="20" x2="104" y2="63" stroke="#030912" stroke-width="1.8"/>
+  <ellipse cx="76" cy="23" rx="28" ry="4.5" fill="url(#cyl-cap-b)"/>
+  <ellipse cx="76" cy="23" rx="28" ry="4.5" fill="none" stroke="#0A1828" stroke-width="0.8"/>
+
+  <!-- ② BLADE — enters from RIGHT
+       Cylinder width = 56 px (x=48–104). Tip 71% from right: 104 − 0.71×56 = 64.2 → x=64
+       Polygon: entry(134,60)  spine-end(68,60)  tip(64,64)  bevel-end(70,68)  entry(134,68)
+  -->
+  <polygon points="134,60  68,60  64,65  70,70  134,70" fill="url(#blade-b)"/>
+  <polygon points="134,60  68,60  64,65  70,70  134,70" fill="url(#blade-dim-b)" opacity="0.38"/>
+  <line x1="134" y1="60" x2="68"  y2="60" stroke="#B8D2E0" stroke-width="0.8" opacity="0.5"/>
+  <line x1="68"  y1="60" x2="64"  y2="65" stroke="#DCF0FC" stroke-width="1.0" opacity="0.75"/>
+  <line x1="64"  y1="65" x2="70"  y2="70" stroke="#98B8C8" stroke-width="0.65" opacity="0.52"/>
+  <rect x="131" y="60" width="3" height="10" rx="1" fill="#384850"/>
+  <!-- Tip contact glow -->
+  <circle cx="64" cy="65" r="5.5" fill="#00B8F0" opacity="0.30" filter="url(#tg-b)"/>
+  <circle cx="64" cy="65" r="2.0" fill="#00E0FF" opacity="0.90"/>
+  <!-- Seam line (where already cut) -->
+  <line x1="64" y1="65" x2="104" y2="65" stroke="#00CCEE" stroke-width="1.0" opacity="0.48"/>
+
+  <!-- ③ LARGE SPHERE — the hero output pellet -->
+  <circle cx="76" cy="99" r="34" fill="url(#sph-b)"/>
+  <!-- Cut face glow at top of sphere (where blade separated it) -->
+  <ellipse cx="76" cy="65" rx="34" ry="5" fill="url(#sphere-rim)" clip-path="url(#sphere-top-b)"/>
+  <!-- Specular highlight -->
+  <ellipse cx="63" cy="88" rx="9" ry="7" fill="white" opacity="0.10"/>
+  <!-- Ground shadow -->
+  <ellipse cx="76" cy="134" rx="22" ry="3" fill="rgba(0,0,0,0.34)"/>
+
+</g>
+<circle cx="76" cy="80" r="56" fill="none" stroke="#162A42" stroke-width="1.5"/>
+
+<text x="152" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#0D1826" letter-spacing="-1">SNAP</text>
+<text x="327" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#006FA0">·</text>
+<text x="350" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#0D1826" letter-spacing="-1">CUT</text>
+<line x1="152" y1="104" x2="481" y2="104" stroke="#B0BCC8" stroke-width="0.75"/>
+<text x="152" y="123" font-family="'Helvetica Neue',Arial,sans-serif" font-size="11.5" font-weight="400" fill="#5A7090" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
+</svg>

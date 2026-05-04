@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SNAP·CUT — Green / Recycling variant
+  Concept: the cut action sits inside the recycling loop.
+  Badge ring is a broken recycling arrow in green — the "loop" that the machine feeds.
+  Cylinder (dark green) → blade → bright green sphere (clean recycled pellet).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+<defs>
+
+  <!-- Badge outer glow — green -->
+  <!-- Cylinder: dark green cylindrical shading -->
+  <linearGradient id="cyl-g" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#031008"/>
+    <stop offset="20%"  stop-color="#0A2214"/>
+    <stop offset="50%"  stop-color="#134028"/>
+    <stop offset="80%"  stop-color="#0A2214"/>
+    <stop offset="100%" stop-color="#031008"/>
+  </linearGradient>
+  <radialGradient id="cyl-cap-g" cx="38%" cy="32%" r="65%">
+    <stop offset="0%"   stop-color="#1A4830"/>
+    <stop offset="100%" stop-color="#061A0C"/>
+  </radialGradient>
+
+  <!-- Sphere: bright clean green — the recycled pellet output -->
+  <radialGradient id="sph-g" cx="30%" cy="24%" r="70%">
+    <stop offset="0%"   stop-color="#52C87A"/>  <!-- bright green highlight -->
+    <stop offset="28%"  stop-color="#2A8A48"/>
+    <stop offset="60%"  stop-color="#145C28"/>
+    <stop offset="100%" stop-color="#071C0E"/>
+  </radialGradient>
+
+  <!-- Blade: same metallic steel (universal — the tool) -->
+  <linearGradient id="blade-g" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#4E5F6E"/>
+    <stop offset="28%"  stop-color="#92B2C6"/>
+    <stop offset="52%"  stop-color="#C2D8EA"/>
+    <stop offset="76%"  stop-color="#74929E"/>
+    <stop offset="100%" stop-color="#3E505C"/>
+  </linearGradient>
+  <linearGradient id="tip-dim-g" x1="100%" y1="0%" x2="0%" y2="0%">
+    <stop offset="0%"   stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.28)"/>
+  </linearGradient>
+
+  <clipPath id="badge-g"><circle cx="76" cy="80" r="56"/></clipPath>
+
+  <filter id="tg-g" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+  <!-- Tip glow — green tint for green variant -->
+  <filter id="sphere-glow-g" x="-50%" y="-50%" width="200%" height="200%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+</defs>
+
+<!-- Badge shadow (dark green tint) -->
+<circle cx="76" cy="84" r="56" fill="rgba(0,10,4,0.30)"/>
+<!-- Badge fill: very dark green -->
+<circle cx="76" cy="80" r="56" fill="#050F08"/>
+
+<!--
+  ── RECYCLING RING — outside the badge, wrapping it
+  Three arcs forming a broken ring (like ♻ simplified to 3 segments with gaps).
+  Drawn as thick stroked arcs with arrow-like ends.
+  Ring radius = 64 (8 px outside badge r=56), stroke-width = 7
+  Three 100° arcs separated by 20° gaps, with small arrowheads.
+-->
+
+<!-- Arc 1: top-right segment (−30° to 70°, i.e. 330°–70° = 100°) -->
+<path d="M 130.4,47.5 A 64,64 0 0,1 101.0,137.9"
+      fill="none" stroke="#28A048" stroke-width="6.5"
+      stroke-linecap="round" opacity="0.85"/>
+<!-- Arrow at end of Arc 1 -->
+<polygon points="101,138  92,128  107,127" fill="#28A048" opacity="0.85"/>
+
+<!-- Arc 2: bottom segment (150° to 250°) -->
+<path d="M 51.0,137.9 A 64,64 0 0,1 12.0,54.2"
+      fill="none" stroke="#28A048" stroke-width="6.5"
+      stroke-linecap="round" opacity="0.85"/>
+<polygon points="12,54  22,44  24,59" fill="#28A048" opacity="0.85"/>
+
+<!-- Arc 3: top-left segment (270° to 10°) -->
+<path d="M 21.5,26.0 A 64,64 0 0,1 120.8,32.0"
+      fill="none" stroke="#28A048" stroke-width="6.5"
+      stroke-linecap="round" opacity="0.85"/>
+<polygon points="121,32  126,43  111,43" fill="#28A048" opacity="0.85"/>
+
+<g clip-path="url(#badge-g)">
+
+  <!-- ① GREEN CYLINDER — raw recyclable material input -->
+  <rect x="31" y="20" width="90" height="58" fill="url(#cyl-g)"/>
+  <line x1="31"  y1="20" x2="31"  y2="78" stroke="#020A05" stroke-width="2"/>
+  <line x1="121" y1="20" x2="121" y2="78" stroke="#020A05" stroke-width="2"/>
+  <ellipse cx="76" cy="23" rx="45" ry="5.5" fill="url(#cyl-cap-g)"/>
+  <ellipse cx="76" cy="23" rx="45" ry="5.5" fill="none" stroke="#071A0C" stroke-width="0.9"/>
+
+  <!-- ② BLADE — same steel, universal tool -->
+  <polygon points="134,71  62,71  55,76  63,82  134,82" fill="url(#blade-g)"/>
+  <polygon points="134,71  62,71  55,76  63,82  134,82" fill="url(#tip-dim-g)" opacity="0.38"/>
+  <line x1="134" y1="71" x2="62"  y2="71" stroke="#B8D2E0" stroke-width="0.8" opacity="0.5"/>
+  <line x1="62"  y1="71" x2="55"  y2="76" stroke="#DCF0FC" stroke-width="1.0" opacity="0.72"/>
+  <line x1="55"  y1="76" x2="63"  y2="82" stroke="#98B8C8" stroke-width="0.65" opacity="0.52"/>
+  <rect x="131" y="71" width="3" height="11" rx="1" fill="#38484E"/>
+
+  <!-- Tip contact glow — cyan on green bg still reads well -->
+  <circle cx="55" cy="76" r="6"   fill="#00C878" opacity="0.35" filter="url(#tg-g)"/>
+  <circle cx="55" cy="76" r="2.0" fill="#40FFB0" opacity="0.90"/>
+  <line x1="55" y1="76" x2="121" y2="76" stroke="#20E890" stroke-width="1.0" opacity="0.45"/>
+
+  <!-- ③ BRIGHT GREEN SPHERE — the clean recycled pellet output -->
+  <!-- Subtle green glow beneath sphere (the "clean" aura) -->
+  <circle cx="76" cy="110" r="28" fill="#1A8040" opacity="0.18" filter="url(#sphere-glow-g)"/>
+  <!-- Sphere body -->
+  <circle cx="76" cy="110" r="24" fill="url(#sph-g)"/>
+  <!-- Strong specular highlight — green pellet is clean and shiny -->
+  <ellipse cx="66" cy="101" rx="8" ry="6" fill="white" opacity="0.18"/>
+  <!-- Tiny secondary highlight -->
+  <ellipse cx="72" cy="99"  rx="3" ry="2" fill="white" opacity="0.30"/>
+  <!-- Ground shadow (tinted green) -->
+  <ellipse cx="76" cy="135" rx="17" ry="2.5" fill="rgba(0,20,8,0.45)"/>
+
+</g>
+
+<!-- Badge ring — dark green -->
+<circle cx="76" cy="80" r="56" fill="none" stroke="#0C2A16" stroke-width="1.5"/>
+
+<!-- WORDMARK — same positions, green dot -->
+<text x="152" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#0D1826" letter-spacing="-1">SNAP</text>
+<text x="327" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#1A8A38">·</text>
+<text x="350" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif" font-size="56" font-weight="900" fill="#0D1826" letter-spacing="-1">CUT</text>
+<line x1="152" y1="104" x2="481" y2="104" stroke="#B0C0B4" stroke-width="0.75"/>
+<text x="152" y="123" font-family="'Helvetica Neue',Arial,sans-serif" font-size="11.5" font-weight="400" fill="#4A6850" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
+</svg>
