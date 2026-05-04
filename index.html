@@ -1527,10 +1527,9 @@ function tick() {
   if (pBs) pBs.textContent = basketCuts.toLocaleString() + ' cuts · ' + fmtSec(basketSec);
 
   // Basket weigh reminder — neutral animation after configured cut count
-  const WEIGH_THRESHOLD = gSet.basketRemind.val;
   const bb = document.getElementById('btn-basket');
   const wb = document.getElementById('weigh-badge');
-  const shouldRemind = basketCuts >= WEIGH_THRESHOLD && state !== 'idle';
+  const shouldRemind = basketSec >= gSet.basketRemind.val * 60 && state !== 'idle';
   if (bb) bb.classList.toggle('weigh-remind', shouldRemind);
   if (wb) wb.classList.toggle('show', shouldRemind);
 }
@@ -1965,7 +1964,7 @@ function confirmBladeChange() {
 
 // ── Sim: trigger weigh reminder ───────────────────
 function triggerWeighRemind() {
-  basketCuts = gSet.basketRemind.val; // set to threshold to show reminder immediately
+  basketSec = gSet.basketRemind.val * 60; // jump to threshold to show reminder immediately
 }
 
 // ── Filter Change ─────────────────────────────────
@@ -2001,7 +2000,7 @@ const gSet = {
   bladeLimit:     { label: 'Blade Life Limit',        val: 10000,unit: ' cuts', min: 1000,max: 50000, step: 1000, decimals: 0 },
   bladeWarn:      { label: 'Blade Warning At',        val: 10,   unit: '%',     min: 5,   max: 30,    step: 1,    decimals: 0 },
   basketTare:     { label: 'Basket Tare Weight',      val: 5.8,  unit: ' kg',   min: 0,   max: 20,    step: 0.1,  decimals: 1 },
-  basketRemind:   { label: 'Basket Weigh Reminder',  val: 200,  unit: ' cuts', min: 50,  max: 2000,  step: 50,   decimals: 0 },
+  basketRemind:   { label: 'Basket Weigh Reminder',  val: 60,   unit: ' min',  min: 5,   max: 480,   step: 5,    decimals: 0 },
 };
 
 function fmtGVal(key) {
