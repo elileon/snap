@@ -796,15 +796,21 @@
       font-size: 18px; transform-origin: center bottom;
     }
 
-    /* Sensor health — unit-grouped layout */
-    .sensor-unit-group { margin-bottom: 10px; }
-    .sensor-unit-group:last-child { margin-bottom: 0; }
-    .sensor-unit-hdr {
-      font-size: 10px; font-weight: 700; letter-spacing: 2px;
-      color: var(--cyan); text-transform: uppercase;
-      margin-bottom: 5px; padding: 0 2px;
+    /* Sensor health — single-row-per-unit layout */
+    .sensor-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; background: var(--elevated);
+      border-radius: 7px; margin-bottom: 5px;
     }
-    .sensor-unit-rows { display: flex; flex-direction: column; gap: 4px; }
+    .sensor-row:last-child { margin-bottom: 0; }
+    .sensor-row-lbl {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      color: var(--cyan); text-transform: uppercase; min-width: 38px;
+    }
+    .sensor-pair { display: flex; gap: 16px; flex: 1; }
+    .sensor-pip  { display: flex; align-items: center; gap: 5px; }
+    .s-pip-name  { font-size: 12px; font-weight: 600; color: var(--text-2); }
+    .s-ok-lbl    { font-size: 10px; font-weight: 700; color: var(--green); margin-left: 2px; }
 
     /* Filter log */
     .filter-log-list { display: flex; flex-direction: column; gap: 5px; }
@@ -1146,18 +1152,18 @@
       <div class="mc mc-r">
         <div class="mcard">
           <div class="mcard-title">Sensor Health</div>
-          <div class="sensor-unit-group">
-            <div class="sensor-unit-hdr">Front Unit</div>
-            <div class="sensor-unit-rows">
-              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div></div><div class="s-ok-lbl">OK</div></div>
-              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+          <div class="sensor-row">
+            <span class="sensor-row-lbl">Front</span>
+            <div class="sensor-pair">
+              <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">Home</span><span class="s-ok-lbl">OK</span></div>
+              <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">End</span><span class="s-ok-lbl">OK</span></div>
             </div>
           </div>
-          <div class="sensor-unit-group">
-            <div class="sensor-unit-hdr">Rear Unit</div>
-            <div class="sensor-unit-rows">
-              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">Home Sensor</div></div><div class="s-ok-lbl">OK</div></div>
-              <div class="sensor-item"><div class="s-dot2 ok"></div><div class="s-info"><div class="s-name">End Sensor</div></div><div class="s-ok-lbl">OK</div></div>
+          <div class="sensor-row">
+            <span class="sensor-row-lbl">Rear</span>
+            <div class="sensor-pair">
+              <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">Home</span><span class="s-ok-lbl">OK</span></div>
+              <div class="sensor-pip"><div class="s-dot2 ok"></div><span class="s-pip-name">End</span><span class="s-ok-lbl">OK</span></div>
             </div>
           </div>
         </div>
@@ -1432,6 +1438,8 @@
   <div class="demo-sep"></div>
   <button class="demo-btn d-green" onclick="demoNewWO()">↺ Reset to IDLE</button>
   <button class="demo-btn d-green" onclick="demoNewWO(); openNewWO()">＋ Open New WO</button>
+  <div class="demo-sep"></div>
+  <button class="demo-btn" style="border-color:rgba(0,200,240,0.5);color:var(--cyan)" onclick="triggerWeighRemind()">⚖ Weigh Remind</button>
 </div>
 
 <script>
@@ -1930,6 +1938,11 @@ function confirmBladeChange() {
   closeModal();
 }
 
+// ── Sim: trigger weigh reminder ───────────────────
+function triggerWeighRemind() {
+  basketCuts = 200; // threshold to show the reminder immediately
+}
+
 // ── Filter Change ─────────────────────────────────
 function openFilterChange() {
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1939,7 +1952,10 @@ function openFilterChange() {
   row.className = 'flog-row';
   row.innerHTML = `<span class="flog-ts">${ts}</span><span class="flog-desc">Recycling machine filter replaced</span>`;
   const logEl = document.getElementById('filter-change-log');
-  if (logEl) logEl.insertBefore(row, logEl.firstChild);
+  if (!logEl) return;
+  logEl.insertBefore(row, logEl.firstChild);
+  // Keep only last 2 entries visible
+  while (logEl.children.length > 2) logEl.removeChild(logEl.lastChild);
 }
 
 // ── Materials data ────────────────────────────────
