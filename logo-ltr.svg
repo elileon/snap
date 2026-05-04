@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SNAP·CUT Logo — Alternate, blade enters from LEFT (left-to-right)
+  Mirror of primary: tip reaches 73 % from left side of cylinder.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+<defs>
+
+  <linearGradient id="cyl-l" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#050D18"/>
+    <stop offset="18%"  stop-color="#102238"/>
+    <stop offset="50%"  stop-color="#1A4060"/>
+    <stop offset="82%"  stop-color="#102238"/>
+    <stop offset="100%" stop-color="#050D18"/>
+  </linearGradient>
+  <radialGradient id="cyl-cap-l" cx="40%" cy="35%" r="65%">
+    <stop offset="0%"   stop-color="#224460"/>
+    <stop offset="100%" stop-color="#091C2C"/>
+  </radialGradient>
+
+  <linearGradient id="blade-l" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#556070"/>
+    <stop offset="25%"  stop-color="#98B8CC"/>
+    <stop offset="50%"  stop-color="#C8DDE8"/>
+    <stop offset="78%"  stop-color="#7A9AAB"/>
+    <stop offset="100%" stop-color="#445260"/>
+  </linearGradient>
+  <!-- Shadow toward tip — LEFT-to-right entry: darkens toward the right (tip) -->
+  <linearGradient id="blade-shadow-l" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.28)"/>
+  </linearGradient>
+
+  <radialGradient id="sph-l" cx="32%" cy="26%" r="68%">
+    <stop offset="0%"   stop-color="#28507A"/>
+    <stop offset="42%"  stop-color="#132E4C"/>
+    <stop offset="100%" stop-color="#060F1C"/>
+  </radialGradient>
+
+  <clipPath id="badge-l">
+    <circle cx="76" cy="80" r="56"/>
+  </clipPath>
+
+  <filter id="tipglow-l" x="-200%" y="-200%" width="500%" height="500%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+</defs>
+
+<!--
+  MARK — same geometry as primary but X-mirrored around x=76.
+  Blade polygon (right-entry):  134,71  62,71  56,76  64,82  134,82
+  Mirrored (x' = 152-x):
+    134→18   62→90   56→96   64→88   134→18
+  → polygon: 18,71  90,71  96,76  88,82  18,82
+  Seam: tip x=96 → left cylinder edge x=26
+  Cut seam: x=26 to x=96
+-->
+
+<circle cx="76" cy="84" r="56" fill="rgba(0,0,0,0.22)"/>
+<circle cx="76" cy="80" r="56" fill="#07101C"/>
+
+<g clip-path="url(#badge-l)">
+
+  <!-- ① CYLINDER -->
+  <rect x="26" y="20" width="100" height="57" fill="url(#cyl-l)"/>
+  <line x1="26"  y1="20" x2="26"  y2="77" stroke="#030A12" stroke-width="2"/>
+  <line x1="126" y1="20" x2="126" y2="77" stroke="#030A12" stroke-width="2"/>
+  <ellipse cx="76" cy="23" rx="50" ry="6" fill="url(#cyl-cap-l)"/>
+  <ellipse cx="76" cy="23" rx="50" ry="6" fill="none" stroke="#0A1A28" stroke-width="1"/>
+
+  <!-- ② BLADE (enters from LEFT, tip points RIGHT)
+       Mirrored polygon vertices:
+         A ( 18, 71) — entry top (left badge edge)
+         B ( 90, 71) — spine end / bevel start (top)
+         C ( 96, 76) — TIP
+         D ( 88, 82) — bevel end / cutting-edge start (bottom)
+         E ( 18, 82) — entry bottom
+  -->
+  <polygon points="18,71  90,71  96,76  88,82  18,82"
+           fill="url(#blade-l)"/>
+  <polygon points="18,71  90,71  96,76  88,82  18,82"
+           fill="url(#blade-shadow-l)" opacity="0.4"/>
+
+  <!-- Spine (top edge of blade back) -->
+  <line x1="18"  y1="71" x2="90"  y2="71" stroke="#BDD4E2" stroke-width="0.8" opacity="0.55"/>
+  <!-- Bevel highlights -->
+  <line x1="90"  y1="71" x2="96"  y2="76" stroke="#E0F0FA" stroke-width="1.1" opacity="0.75"/>
+  <line x1="96"  y1="76" x2="88"  y2="82" stroke="#A0BCCC" stroke-width="0.7" opacity="0.55"/>
+
+  <!-- Blade thickness (left face — entry side) -->
+  <rect x="18" y="71" width="3" height="11" rx="1" fill="#3A4A58"/>
+
+  <!-- Cyan contact glow at tip -->
+  <circle cx="96" cy="76" r="6"   fill="#00B8F0" opacity="0.30" filter="url(#tipglow-l)"/>
+  <circle cx="96" cy="76" r="2.2" fill="#00E0FF" opacity="0.92"/>
+
+  <!-- Cut seam: where blade has already passed (left cylinder edge → tip) -->
+  <line x1="26" y1="76" x2="96" y2="76"
+        stroke="#00D0EE" stroke-width="1.1" opacity="0.50"/>
+
+  <!-- ③ SPHERE -->
+  <circle cx="76" cy="108" r="27" fill="url(#sph-l)"/>
+  <ellipse cx="66" cy="99" rx="8" ry="5.5" fill="white" opacity="0.09"/>
+  <ellipse cx="76" cy="136" rx="20" ry="3" fill="rgba(0,0,0,0.35)"/>
+
+</g>
+
+<circle cx="76" cy="80" r="56" fill="none" stroke="#162A42" stroke-width="1.5"/>
+
+<!-- WORDMARK — identical to primary -->
+<text x="152" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#0D1826" letter-spacing="-1">SNAP</text>
+
+<text x="327" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900" fill="#006FA0">·</text>
+
+<text x="350" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#0D1826" letter-spacing="-1">CUT</text>
+
+<line x1="152" y1="104" x2="481" y2="104" stroke="#B0BCC8" stroke-width="0.75"/>
+
+<text x="152" y="123"
+      font-family="'Helvetica Neue',Arial,sans-serif"
+      font-size="11.5" font-weight="400"
+      fill="#5A7090" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
+
+</svg>
