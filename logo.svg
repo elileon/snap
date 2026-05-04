@@ -1,116 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  SNAP·CUT Logo
-  Concept: two plastic strips diagonally cut and snapped apart — the core action of the machine.
-  The cyan blade line echoes the HMI palette. The dot separator is brand-consistent with the HMI header.
+  SNAP·CUT Logo — Primary (light background)
+  Mark: a sphere of plastic material, cut horizontally by a blade.
+  The bottom half drops — "clean drop". The cyan blade line glows at the cut plane.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
-  <defs>
+<defs>
 
-    <!-- Clip bars to the circular badge -->
-    <clipPath id="badge-clip">
-      <circle cx="76" cy="80" r="58"/>
-    </clipPath>
+  <!-- Sphere gradient: light source top-left → dark bottom-right -->
+  <radialGradient id="sg-a" cx="34%" cy="26%" r="72%">
+    <stop offset="0%"   stop-color="#2E5678"/>
+    <stop offset="42%"  stop-color="#16304C"/>
+    <stop offset="100%" stop-color="#081420"/>
+  </radialGradient>
+  <!-- Bottom half: same gradient but slightly cooler/darker -->
+  <radialGradient id="sg-b" cx="38%" cy="28%" r="72%">
+    <stop offset="0%"   stop-color="#1E3E5A"/>
+    <stop offset="100%" stop-color="#081420"/>
+  </radialGradient>
+  <!-- Cut face: flat disc visible at the cut plane -->
+  <radialGradient id="sg-face" cx="40%" cy="40%" r="60%">
+    <stop offset="0%"   stop-color="#1F3D5E"/>
+    <stop offset="100%" stop-color="#0C1F32"/>
+  </radialGradient>
 
-    <!-- Cut line: (91,22) → (62,138) — slight diagonal, mimicking a real blade angle -->
-    <clipPath id="cut-left">
-      <polygon points="0,0  91,22  62,138  0,138"/>
-    </clipPath>
-    <clipPath id="cut-right">
-      <polygon points="91,22  160,0  160,160  62,138"/>
-    </clipPath>
+  <!-- Clip: top half of sphere — above the cut (y ≤ 78) -->
+  <clipPath id="c-top">
+    <rect x="18" y="18" width="116" height="60"/>
+  </clipPath>
+  <!-- Clip: bottom half — below the cut (y ≥ 78) -->
+  <clipPath id="c-bot">
+    <rect x="18" y="78" width="116" height="74"/>
+  </clipPath>
+  <!-- Clip: everything to the badge circle -->
+  <clipPath id="badge">
+    <circle cx="76" cy="80" r="56"/>
+  </clipPath>
 
-    <!-- Cyan glow on the blade line -->
-    <filter id="cyan-glow" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+  <!-- Cyan glow filter for the cut line -->
+  <filter id="glow" x="-60%" y="-200%" width="220%" height="500%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
 
-  </defs>
+</defs>
 
-  <!-- Transparent background — works on any surface -->
+<!-- ══════════════════════════════════════
+     ICON MARK — sphere cut horizontally
+     Sphere: center (76, 78), radius 44
+     Cut plane: y = 78
+     Bottom half: drops 11 px
+════════════════════════════════════════ -->
 
-  <!-- ══════════════════════════════════════
-       ICON MARK
-  ══════════════════════════════════════ -->
+<!-- Badge shadow -->
+<circle cx="76" cy="83" r="56" fill="rgba(0,0,0,0.20)"/>
+<!-- Badge fill -->
+<circle cx="76" cy="80" r="56" fill="#090F1A"/>
 
-  <!-- Drop shadow -->
-  <circle cx="76" cy="83" r="57" fill="rgba(0,0,0,0.16)"/>
-  <!-- Badge fill -->
-  <circle cx="76" cy="80" r="57" fill="#0D1826"/>
+<g clip-path="url(#badge)">
 
-  <!-- LEFT halves — slightly shifted left after the cut -->
-  <g clip-path="url(#badge-clip)">
-    <g clip-path="url(#cut-left)" transform="translate(-4,0)">
-      <rect x="18" y="44" width="116" height="26" rx="5" fill="#1C3652"/>
-      <rect x="18" y="44" width="116" height="7"  rx="5" fill="#284C72" opacity="0.9"/>
-      <rect x="18" y="88" width="116" height="26" rx="5" fill="#1C3652"/>
-      <rect x="18" y="88" width="116" height="7"  rx="5" fill="#284C72" opacity="0.9"/>
-    </g>
+  <!-- TOP HALF of sphere -->
+  <circle cx="76" cy="78" r="44" fill="url(#sg-a)" clip-path="url(#c-top)"/>
+  <!-- Specular highlight — soft bright oval top-left -->
+  <ellipse cx="61" cy="52" rx="13" ry="9"
+           fill="white" opacity="0.07"/>
+
+  <!-- Cut face of top piece (bottom of upper half) — concave disc -->
+  <ellipse cx="76" cy="78" rx="44" ry="7.5"
+           fill="url(#sg-face)"/>
+  <!-- Inner ring on cut face: machined edge -->
+  <ellipse cx="76" cy="78" rx="44" ry="7.5"
+           fill="none" stroke="#0C2030" stroke-width="1"/>
+
+  <!-- BOTTOM HALF of sphere — translated down 11 px after the cut -->
+  <g transform="translate(0,11)">
+    <!-- Sphere bottom body -->
+    <circle cx="76" cy="78" r="44" fill="url(#sg-b)" clip-path="url(#c-bot)"/>
+    <!-- Cut face of bottom piece (top of lower half) — freshly cut surface -->
+    <ellipse cx="76" cy="78" rx="44" ry="7.5"
+             fill="#162C44"/>
+    <!-- Fresher, slightly lighter inner disc -->
+    <ellipse cx="76" cy="78" rx="28" ry="4.5"
+             fill="#1D3C58" opacity="0.8"/>
+    <!-- Central glint — the cut is clean and shiny -->
+    <ellipse cx="76" cy="77.5" rx="12" ry="1.8"
+             fill="#3A6888" opacity="0.55"/>
   </g>
 
-  <!-- RIGHT halves — slightly shifted right, marginally darker -->
-  <g clip-path="url(#badge-clip)">
-    <g clip-path="url(#cut-right)" transform="translate(4,0)">
-      <rect x="18" y="44" width="116" height="26" rx="5" fill="#152B44"/>
-      <rect x="18" y="44" width="116" height="7"  rx="5" fill="#1F3D5C" opacity="0.8"/>
-      <rect x="18" y="88" width="116" height="26" rx="5" fill="#152B44"/>
-      <rect x="18" y="88" width="116" height="7"  rx="5" fill="#1F3D5C" opacity="0.8"/>
-    </g>
-  </g>
+  <!-- ── BLADE LINE at cut plane ── -->
+  <!-- Outer soft glow -->
+  <line x1="18" y1="78" x2="134" y2="78"
+        stroke="#00C8F0" stroke-width="10"
+        stroke-linecap="round" opacity="0.22"
+        filter="url(#glow)"/>
+  <!-- Core line: the sharp edge of the blade -->
+  <line x1="18" y1="78" x2="134" y2="78"
+        stroke="#00E0FF" stroke-width="2.2"
+        stroke-linecap="round"/>
 
-  <!-- Blade — outer glow -->
-  <line x1="91" y1="22" x2="62" y2="138"
-        stroke="#00C8F0" stroke-width="10" stroke-linecap="round"
-        opacity="0.20" filter="url(#cyan-glow)"
-        clip-path="url(#badge-clip)"/>
-  <!-- Blade — sharp core -->
-  <line x1="91" y1="22" x2="62" y2="138"
-        stroke="#00DCFF" stroke-width="2.6" stroke-linecap="round"
-        clip-path="url(#badge-clip)"/>
+  <!-- Blade tip: triangular point entering from right -->
+  <polygon points="130,74.5 140,78 130,81.5"
+           fill="#00E0FF" opacity="0.75"/>
 
-  <!-- Badge ring -->
-  <circle cx="76" cy="80" r="57"
-          fill="none" stroke="#1C3652" stroke-width="1.5"/>
+</g>
 
-  <!-- ══════════════════════════════════════
-       WORDMARK
-       Measured widths @ 56px Arial Black:
-         SNAP = 171 px
-         ·    =  19 px
-         CUT  = 131 px
-       Start x = 152  →  end x ≈ 481
-  ══════════════════════════════════════ -->
+<!-- Badge ring -->
+<circle cx="76" cy="80" r="56"
+        fill="none" stroke="#1A3050" stroke-width="1.5"/>
 
-  <!-- SNAP -->
-  <text x="152" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#0D1826" letter-spacing="-1">SNAP</text>
 
-  <!-- · dot — cyan, brand separator -->
-  <text x="327" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#007AB0">·</text>
+<!-- ══════════════════════════════════════
+     WORDMARK
+     Measured @ 56 px Arial Black:
+       SNAP = 171 px  ·= 19 px  CUT = 131 px
+     x start = 152 → end ≈ 481
+════════════════════════════════════════ -->
 
-  <!-- CUT -->
-  <text x="350" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#0D1826" letter-spacing="-1">CUT</text>
+<text x="152" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#0D1826" letter-spacing="-1">SNAP</text>
 
-  <!-- Hairline rule -->
-  <line x1="152" y1="107" x2="481" y2="107"
-        stroke="#B0BCC8" stroke-width="0.75"/>
+<text x="327" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#006FA0">·</text>
 
-  <!-- Tagline (measured: ~198 px wide — left-aligned with wordmark) -->
-  <text x="152" y="126"
-        font-family="'Helvetica Neue',Arial,sans-serif"
-        font-size="11.5" font-weight="400"
-        fill="#5A7090" letter-spacing="4">PRECISION CUTTING SYSTEMS</text>
+<text x="350" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#0D1826" letter-spacing="-1">CUT</text>
+
+<!-- Hairline rule -->
+<line x1="152" y1="104" x2="481" y2="104"
+      stroke="#B0BCC8" stroke-width="0.75"/>
+
+<!-- Tagline: brand promise distilled -->
+<text x="152" y="123"
+      font-family="'Helvetica Neue',Arial,sans-serif"
+      font-size="11.5" font-weight="400"
+      fill="#5A7090" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
 
 </svg>

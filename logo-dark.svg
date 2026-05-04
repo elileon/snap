@@ -1,89 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   SNAP·CUT Logo — Dark / Reversed variant
-  Use on dark backgrounds. Wordmark in white, tagline in muted light.
+  Use on dark backgrounds. Wordmark in off-white, dot in bright cyan.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
-  <defs>
+<defs>
 
-    <clipPath id="badge-clip-d">
-      <circle cx="76" cy="80" r="57"/>
-    </clipPath>
+  <radialGradient id="sg-a-dk" cx="34%" cy="26%" r="72%">
+    <stop offset="0%"   stop-color="#2E5678"/>
+    <stop offset="42%"  stop-color="#16304C"/>
+    <stop offset="100%" stop-color="#081420"/>
+  </radialGradient>
+  <radialGradient id="sg-b-dk" cx="38%" cy="28%" r="72%">
+    <stop offset="0%"   stop-color="#1E3E5A"/>
+    <stop offset="100%" stop-color="#081420"/>
+  </radialGradient>
+  <radialGradient id="sg-face-dk" cx="40%" cy="40%" r="60%">
+    <stop offset="0%"   stop-color="#1F3D5E"/>
+    <stop offset="100%" stop-color="#0C1F32"/>
+  </radialGradient>
 
-    <clipPath id="cut-left-d">
-      <polygon points="0,0  91,22  62,138  0,138"/>
-    </clipPath>
-    <clipPath id="cut-right-d">
-      <polygon points="91,22  160,0  160,160  62,138"/>
-    </clipPath>
+  <clipPath id="c-top-dk">
+    <rect x="18" y="18" width="116" height="60"/>
+  </clipPath>
+  <clipPath id="c-bot-dk">
+    <rect x="18" y="78" width="116" height="74"/>
+  </clipPath>
+  <clipPath id="badge-dk">
+    <circle cx="76" cy="80" r="56"/>
+  </clipPath>
 
-    <filter id="cyan-glow-d" x="-80%" y="-80%" width="260%" height="260%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+  <filter id="glow-dk" x="-60%" y="-200%" width="220%" height="500%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
 
-  </defs>
+</defs>
 
-  <!-- Transparent background -->
+<!-- Badge -->
+<circle cx="76" cy="83" r="56" fill="rgba(0,0,0,0.25)"/>
+<circle cx="76" cy="80" r="56" fill="#090F1A"/>
 
-  <!-- ══ ICON MARK ══ -->
-  <circle cx="76" cy="83" r="57" fill="rgba(0,0,0,0.25)"/>
-  <circle cx="76" cy="80" r="57" fill="#0D1826"/>
+<g clip-path="url(#badge-dk)">
 
-  <g clip-path="url(#badge-clip-d)">
-    <g clip-path="url(#cut-left-d)" transform="translate(-4,0)">
-      <rect x="18" y="44" width="116" height="26" rx="5" fill="#1C3652"/>
-      <rect x="18" y="44" width="116" height="7"  rx="5" fill="#284C72" opacity="0.9"/>
-      <rect x="18" y="88" width="116" height="26" rx="5" fill="#1C3652"/>
-      <rect x="18" y="88" width="116" height="7"  rx="5" fill="#284C72" opacity="0.9"/>
-    </g>
+  <circle cx="76" cy="78" r="44" fill="url(#sg-a-dk)" clip-path="url(#c-top-dk)"/>
+  <ellipse cx="61" cy="52" rx="13" ry="9" fill="white" opacity="0.07"/>
+
+  <ellipse cx="76" cy="78" rx="44" ry="7.5" fill="url(#sg-face-dk)"/>
+  <ellipse cx="76" cy="78" rx="44" ry="7.5" fill="none" stroke="#0C2030" stroke-width="1"/>
+
+  <g transform="translate(0,11)">
+    <circle cx="76" cy="78" r="44" fill="url(#sg-b-dk)" clip-path="url(#c-bot-dk)"/>
+    <ellipse cx="76" cy="78" rx="44" ry="7.5" fill="#162C44"/>
+    <ellipse cx="76" cy="78" rx="28" ry="4.5" fill="#1D3C58" opacity="0.8"/>
+    <ellipse cx="76" cy="77.5" rx="12" ry="1.8" fill="#3A6888" opacity="0.55"/>
   </g>
 
-  <g clip-path="url(#badge-clip-d)">
-    <g clip-path="url(#cut-right-d)" transform="translate(4,0)">
-      <rect x="18" y="44" width="116" height="26" rx="5" fill="#152B44"/>
-      <rect x="18" y="44" width="116" height="7"  rx="5" fill="#1F3D5C" opacity="0.8"/>
-      <rect x="18" y="88" width="116" height="26" rx="5" fill="#152B44"/>
-      <rect x="18" y="88" width="116" height="7"  rx="5" fill="#1F3D5C" opacity="0.8"/>
-    </g>
-  </g>
+  <line x1="18" y1="78" x2="134" y2="78"
+        stroke="#00C8F0" stroke-width="10"
+        stroke-linecap="round" opacity="0.22"
+        filter="url(#glow-dk)"/>
+  <line x1="18" y1="78" x2="134" y2="78"
+        stroke="#00E0FF" stroke-width="2.2"
+        stroke-linecap="round"/>
+  <polygon points="130,74.5 140,78 130,81.5" fill="#00E0FF" opacity="0.75"/>
 
-  <line x1="91" y1="22" x2="62" y2="138"
-        stroke="#00C8F0" stroke-width="10" stroke-linecap="round"
-        opacity="0.22" filter="url(#cyan-glow-d)"
-        clip-path="url(#badge-clip-d)"/>
-  <line x1="91" y1="22" x2="62" y2="138"
-        stroke="#00DCFF" stroke-width="2.6" stroke-linecap="round"
-        clip-path="url(#badge-clip-d)"/>
+</g>
 
-  <circle cx="76" cy="80" r="57"
-          fill="none" stroke="#1C3652" stroke-width="1.5"/>
+<circle cx="76" cy="80" r="56" fill="none" stroke="#1A3050" stroke-width="1.5"/>
 
-  <!-- ══ WORDMARK — white on dark ══ -->
-  <text x="152" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#E8F0F8" letter-spacing="-1">SNAP</text>
+<!-- Wordmark — white on dark -->
+<text x="152" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#E6F0FA" letter-spacing="-1">SNAP</text>
 
-  <text x="327" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#00AADD">·</text>
+<text x="327" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#00AADD">·</text>
 
-  <text x="350" y="97"
-        font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
-        font-size="56" font-weight="900"
-        fill="#E8F0F8" letter-spacing="-1">CUT</text>
+<text x="350" y="94"
+      font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900"
+      fill="#E6F0FA" letter-spacing="-1">CUT</text>
 
-  <line x1="152" y1="107" x2="481" y2="107"
-        stroke="#2A4060" stroke-width="0.75"/>
+<line x1="152" y1="104" x2="481" y2="104"
+      stroke="#1E3A58" stroke-width="0.75"/>
 
-  <text x="152" y="126"
-        font-family="'Helvetica Neue',Arial,sans-serif"
-        font-size="11.5" font-weight="400"
-        fill="#4A7090" letter-spacing="4">PRECISION CUTTING SYSTEMS</text>
+<text x="152" y="123"
+      font-family="'Helvetica Neue',Arial,sans-serif"
+      font-size="11.5" font-weight="400"
+      fill="#3A6080" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
 
 </svg>
