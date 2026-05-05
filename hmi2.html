@@ -118,24 +118,32 @@
     html.light .modal-backdrop { background: rgba(200,210,220,0.85); }
     html.light .modal          { box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
 
-    html {
-      width: 15.5cm; height: 8.7cm;
-      overflow: hidden;
-      background: #030508;
-      touch-action: none;
-    }
+    html { background: #030508; }
     body {
-      width: 15.5cm; height: 8.7cm;
-      overflow: hidden;
       background: #030508;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding-bottom: 20px;
       touch-action: none;
       color: var(--text);
       font-family: var(--font);
       user-select: none;
     }
 
-    /* Internal layout is always drawn at 1024×600 px.
-       JS measures the cm-sized body in px and sets the scale. */
+    /* Wrapper collapses to the visual (scaled) size of the frame,
+       so the demo panel sits flush below it with no gap. */
+    .hmi-wrapper {
+      width:  calc(1024px * var(--hmi-scale, 1));
+      height: calc(600px  * var(--hmi-scale, 1));
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* Internal layout always drawn at 1024×600.
+       fitHMI() sets --hmi-scale so the frame is exactly
+       15.5 × 8.7 cm on any physical screen. */
     .hmi-frame {
       width: 1024px; height: 600px;
       overflow: hidden;
@@ -886,7 +894,8 @@
 
     /* ── DEMO PANEL ──────────────────────────── */
     .demo-panel {
-      width: 1024px; margin-top: 10px;
+      width: calc(1024px * var(--hmi-scale, 1));
+      margin-top: 10px;
       background: #0A0E18; border: 1px solid #1A2030;
       border-radius: 8px; padding: 10px 16px;
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -918,6 +927,7 @@
   </style>
 </head>
 <body>
+<div class="hmi-wrapper">
 <div class="hmi-frame">
 <div class="layout">
 
@@ -1456,8 +1466,9 @@
 
 </div><!-- /layout -->
 </div><!-- /hmi-frame -->
+</div><!-- /hmi-wrapper -->
 
-<!-- DEMO CONTROLS — outside HMI frame -->
+<!-- DEMO CONTROLS — below HMI, scales with it -->
 <div class="demo-panel">
   <span class="demo-lbl">Simulator</span>
   <div class="demo-sep"></div>
@@ -2401,15 +2412,37 @@ document.getElementById('theme-btn').title = 'Switch to dark theme';
 </script>
 
 <script>
-/* ── Scale 1024×600 content to fill the 15.5×8.7 cm body ── */
+/* ── Fit HMI to exactly 15.5 × 8.7 cm on any physical screen ──
+   Strategy: binary-search matchMedia(min-resolution) to get the
+   real physical DPI, divide by devicePixelRatio to get CSS DPI,
+   then compute how many CSS pixels = 15.5 cm and scale to match. */
 (function fitHMI() {
-  const W = 1024, H = 600;
+  const HMI_W = 1024, HMI_H = 600;
+  const TARGET_W_CM = 15.5, TARGET_H_CM = 8.7;
+
+  function getPhysicalDPI() {
+    let lo = 50, hi = 600;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (window.matchMedia('(min-resolution: ' + mid + 'dpi)').matches) lo = mid;
+      else hi = mid;
+    }
+    return lo; // physical dots per inch
+  }
+
   function applyScale() {
-    const bw = document.body.clientWidth;
-    const bh = document.body.clientHeight;
-    const scale = Math.min(bw / W, bh / H);
+    const physDPI = getPhysicalDPI();
+    const dpr    = window.devicePixelRatio || 1;
+    const cssDPI = physDPI / dpr; // CSS pixels per inch on this screen
+
+    // How many CSS px correspond to the target physical cm?
+    const targetW = TARGET_W_CM / 2.54 * cssDPI;
+    const targetH = TARGET_H_CM / 2.54 * cssDPI;
+    const scale   = Math.min(targetW / HMI_W, targetH / HMI_H);
+
     document.documentElement.style.setProperty('--hmi-scale', scale);
   }
+
   applyScale();
   window.addEventListener('resize', applyScale);
 })();
