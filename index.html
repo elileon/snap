@@ -2405,7 +2405,7 @@ document.getElementById('theme-btn').title = 'Switch to dark theme';
   function applyScale() {
     const sw = window.innerWidth;
     const sh = window.innerHeight;
-    const scale = Math.min(sw / W, sh / H);
+    const scale = Math.min(1, sw / W, sh / H);
     document.documentElement.style.setProperty('--hmi-scale', scale);
     /* Centre vertically if there is leftover height (e.g. landscape dev window) */
     const frame = document.querySelector('.hmi-frame');
