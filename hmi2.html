@@ -1956,26 +1956,28 @@ function updateProdThroughput() {
 }
 
 function updateProdComputed() {
+  // RL avg throughput — average of all entered RL throughput values
   const rlAvg = rlThroughputCount > 0 ? rlThroughputTotal / rlThroughputCount : 0;
 
   // CP throughput — avg of (wt / runtime_h) for baskets that have weight data
-  // Use b.sec > 0 (not > 60) so simulation baskets are included
+  // b.sec > 0 (not > 60) so simulation baskets with short runtimes are included
   const withWt = basketLog.filter(b => b.wt > 0 && b.sec > 0);
   const cpTp = withWt.length > 0
     ? withWt.reduce((s, b) => s + b.wt / (b.sec / 3600), 0) / withWt.length
     : 0;
 
-  // Total CP weight = actual sum of measured basket weights × 2 units
-  const totalCpWt = totalWt * 2;
+  const hrs = activeSec / 3600;
 
-  // RL total = RL avg throughput × active hours (extrapolated)
-  const rlTotal = rlAvg * (activeSec / 3600);
+  // Total CP weight = cpTp × active hours × 2 units (rate-based extrapolation)
+  // This correctly handles WOs where only some baskets have weight entered
+  const totalCpWt = cpTp > 0 ? cpTp * hrs * 2 : 0;
 
-  // Cut Pieces % — apples-to-apples: only baskets that have BOTH wt and throughput logged
-  const matched = basketLog.filter(b => b.wt > 0 && b.throughput > 0 && b.sec > 0);
-  const matchedCpWt  = matched.reduce((s, b) => s + b.wt * 2, 0);
-  const matchedRlWt  = matched.reduce((s, b) => s + b.throughput * (b.sec / 3600), 0);
-  const cpPct = (matchedRlWt > 0 && matchedCpWt > 0) ? (matchedCpWt / matchedRlWt * 100) : null;
+  // RL total = RL avg throughput × active hours
+  const rlTotal = rlAvg * hrs;
+
+  // Cut Pieces % = ratio of average rates × 2 units
+  // cpTp is per-unit, rlAvg is total line → (cpTp × 2) / rlAvg × 100
+  const cpPct = (rlAvg > 0 && cpTp > 0) ? (cpTp * 2 / rlAvg * 100) : null;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
