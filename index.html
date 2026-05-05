@@ -1947,16 +1947,8 @@ function renderLiveBasketList() {
     </div>`).join('');
 }
 
-function calcCpThroughput() {
-  // average of (basket_wt / basket_runtime_h) for baskets with both wt and runtime
-  const valid = basketLog.filter(b => b.wt > 0 && b.sec > 60);
-  if (valid.length === 0) return 0;
-  const sum = valid.reduce((acc, b) => acc + (b.wt / (b.sec / 3600)), 0);
-  return sum / valid.length;
-}
-
 function updateProdActiveWt() {
-  // kept for compatibility — updateProdComputed handles the new IDs
+  // kept for compatibility
   updateProdComputed();
 }
 function updateProdThroughput() {
@@ -1965,27 +1957,38 @@ function updateProdThroughput() {
 
 function updateProdComputed() {
   const rlAvg = rlThroughputCount > 0 ? rlThroughputTotal / rlThroughputCount : 0;
-  const cpTp  = calcCpThroughput();
-  const hrs   = activeSec / 3600;
 
-  // Cut pieces weight = per-unit throughput × hours × 2 units
-  const totalCpWt = cpTp > 0 ? cpTp * hrs * 2 : 0;
-  // RL total = RL avg throughput × active hours
-  const rlTotal   = rlAvg * hrs;
-  // Waste % = cut pieces wt / RL total × 100
-  const waste     = (rlTotal > 0 && totalCpWt > 0) ? (totalCpWt / rlTotal * 100) : null;
+  // CP throughput — avg of (wt / runtime_h) for baskets that have weight data
+  // Use b.sec > 0 (not > 60) so simulation baskets are included
+  const withWt = basketLog.filter(b => b.wt > 0 && b.sec > 0);
+  const cpTp = withWt.length > 0
+    ? withWt.reduce((s, b) => s + b.wt / (b.sec / 3600), 0) / withWt.length
+    : 0;
+
+  // Total CP weight = actual sum of measured basket weights × 2 units
+  const totalCpWt = totalWt * 2;
+
+  // RL total = RL avg throughput × active hours (extrapolated)
+  const rlTotal = rlAvg * (activeSec / 3600);
+
+  // Cut Pieces % — apples-to-apples: only baskets that have BOTH wt and throughput logged
+  const matched = basketLog.filter(b => b.wt > 0 && b.throughput > 0 && b.sec > 0);
+  const matchedCpWt  = matched.reduce((s, b) => s + b.wt * 2, 0);
+  const matchedRlWt  = matched.reduce((s, b) => s + b.throughput * (b.sec / 3600), 0);
+  const cpPct = (matchedRlWt > 0 && matchedCpWt > 0) ? (matchedCpWt / matchedRlWt * 100) : null;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  set('p-total-weight', totalCpWt > 0 ? Math.round(totalCpWt)      : '—');
-  set('p-cp-tp',        cpTp > 0      ? Math.round(cpTp)            : '—');
-  set('p-throughput',   rlAvg > 0     ? Math.round(rlAvg)           : '—');
-  set('p-rl-total',     rlTotal > 0   ? Math.round(rlTotal)         : '—');
+  set('p-total-weight', totalCpWt > 0 ? Math.round(totalCpWt) : '—');
+  set('p-cp-tp',        cpTp > 0      ? Math.round(cpTp)       : '—');
+  set('p-throughput',   rlAvg > 0     ? Math.round(rlAvg)      : '—');
+  set('p-rl-total',     rlTotal > 0   ? Math.round(rlTotal)    : '—');
+
   const wasteEl = document.getElementById('p-waste');
   if (wasteEl) {
-    if (waste !== null) {
-      wasteEl.textContent = waste.toFixed(1) + '%';
-      wasteEl.style.color = waste > 60 ? 'var(--red)' : waste > 45 ? 'var(--amber)' : 'var(--green)';
+    if (cpPct !== null) {
+      wasteEl.textContent = cpPct.toFixed(1) + '%';
+      wasteEl.style.color = cpPct > 60 ? 'var(--red)' : cpPct > 45 ? 'var(--amber)' : 'var(--green)';
     } else {
       wasteEl.textContent = '—';
       wasteEl.style.color = 'var(--text-3)';
