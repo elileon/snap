@@ -1482,6 +1482,10 @@
   <button class="demo-btn d-green" onclick="demoNewWO(); openNewWO()">＋ Open New WO</button>
   <div class="demo-sep"></div>
   <button class="demo-btn" style="border-color:rgba(0,200,240,0.5);color:var(--cyan)" onclick="triggerWeighRemind()">⚖ Weigh Remind</button>
+  <div class="demo-sep"></div>
+  <button class="demo-btn" onclick="hmiScaleStep(-0.05)" title="Shrink display">−</button>
+  <span id="hmi-scale-val" style="font-size:11px;color:#3A5070;font-family:'Rajdhani',sans-serif;font-weight:700;min-width:34px;text-align:center;">100%</span>
+  <button class="demo-btn" onclick="hmiScaleStep(+0.05)" title="Grow display">+</button>
 </div>
 
 <script>
@@ -2412,39 +2416,42 @@ document.getElementById('theme-btn').title = 'Switch to dark theme';
 </script>
 
 <script>
-/* ── Fit HMI to exactly 15.5 × 8.7 cm on any physical screen ──
-   Strategy: binary-search matchMedia(min-resolution) to get the
-   real physical DPI, divide by devicePixelRatio to get CSS DPI,
-   then compute how many CSS pixels = 15.5 cm and scale to match. */
+/* ── HMI scale ─────────────────────────────────────────────────────
+   On the real 7" panel (1024×600): scale = 1.0 → exactly 15.5 cm.
+   On a dev monitor: browsers never expose actual physical DPI, so we
+   can't auto-calculate the right scale. Instead we save the user's
+   chosen scale to localStorage and restore it on every load.
+   The sim-bar shows [−] scale [+] buttons for one-time calibration.
+   ─────────────────────────────────────────────────────────────────*/
 (function fitHMI() {
   const HMI_W = 1024, HMI_H = 600;
-  const TARGET_W_CM = 15.5, TARGET_H_CM = 8.7;
+  const LS_KEY = 'hmi-dev-scale';
 
-  function getPhysicalDPI() {
-    let lo = 50, hi = 600;
-    while (hi - lo > 1) {
-      const mid = (lo + hi) >> 1;
-      if (window.matchMedia('(min-resolution: ' + mid + 'dpi)').matches) lo = mid;
-      else hi = mid;
-    }
-    return lo; // physical dots per inch
+  function clamp(v) { return Math.max(0.3, Math.min(1.0, +v || 1.0)); }
+
+  function applyScale(s) {
+    s = clamp(s);
+    document.documentElement.style.setProperty('--hmi-scale', s);
+    const el = document.getElementById('hmi-scale-val');
+    if (el) el.textContent = Math.round(s * 100) + '%';
   }
 
-  function applyScale() {
-    const physDPI = getPhysicalDPI();
-    const dpr    = window.devicePixelRatio || 1;
-    const cssDPI = physDPI / dpr; // CSS pixels per inch on this screen
-
-    // How many CSS px correspond to the target physical cm?
-    const targetW = TARGET_W_CM / 2.54 * cssDPI;
-    const targetH = TARGET_H_CM / 2.54 * cssDPI;
-    const scale   = Math.min(targetW / HMI_W, targetH / HMI_H);
-
-    document.documentElement.style.setProperty('--hmi-scale', scale);
+  function savedScale() {
+    const s = parseFloat(localStorage.getItem(LS_KEY));
+    // If no saved value, default to filling the viewport (max 1.0)
+    if (!s) return Math.min(1.0, window.innerWidth / HMI_W, window.innerHeight / HMI_H);
+    return s;
   }
 
-  applyScale();
-  window.addEventListener('resize', applyScale);
+  window.hmiScaleStep = function(delta) {
+    const next = clamp(parseFloat(
+      document.documentElement.style.getPropertyValue('--hmi-scale') || 1) + delta);
+    localStorage.setItem(LS_KEY, next);
+    applyScale(next);
+  };
+
+  applyScale(savedScale());
+  window.addEventListener('resize', () => applyScale(savedScale()));
 })();
 </script>
 </body>
