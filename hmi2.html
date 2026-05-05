@@ -61,6 +61,8 @@
 
     /* Nav bar — hardcoded dark override */
     html.light .nav-bar         { background: #E0E4EA; border-right-color: var(--border); }
+    html.light .nav-ham-btn     { color: var(--text-3); }
+    html.light .nav-ham-btn:hover { color: var(--text); }
     html.light .nav-item        { color: var(--text-3); }
     html.light .nav-item:hover  { background: rgba(0,0,0,0.04); color: var(--text-2); }
     html.light .nav-item.active { color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,116,168,0.06); }
@@ -488,17 +490,28 @@
     .nav-bar {
       width: 92px; background: #050810;
       border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0;
+      transition: width 0.2s ease; overflow: hidden;
     }
+    .nav-bar.collapsed { width: 0; border-right-width: 0; }
     .nav-item {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 6px;
       cursor: pointer; border-left: 3px solid transparent;
-      font-size: 13px; font-weight: 700; letter-spacing: 1.5px;
+      font-size: 14px; font-weight: 700; letter-spacing: 1.5px;
       color: var(--text-3); text-transform: uppercase; transition: all 0.15s;
+      white-space: nowrap; min-width: 92px;
     }
     .nav-item:hover { color: var(--text-2); background: rgba(255,255,255,0.015); }
     .nav-item.active { color: var(--cyan); border-left-color: var(--cyan); background: rgba(0,200,240,0.04); }
     .nav-icon { font-size: 26px; line-height: 1; }
+
+    /* Hamburger button in top bar */
+    .nav-ham-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 0 14px; height: 100%; font-size: 20px;
+      color: var(--text-3); transition: color 0.15s; flex-shrink: 0; line-height: 1;
+    }
+    .nav-ham-btn:hover { color: var(--text); }
 
     /* ── MANUAL SCREEN ───────────────────────── */
     #screen-manual { flex-direction: column; }
@@ -560,21 +573,23 @@
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .kpi-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
     .kpi { display: flex; flex-direction: column; gap: 3px; }
-    .kpi-lbl { font-size: 11px; letter-spacing: 1px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
-    .kpi-val { font-family: var(--font-mono); font-size: 22px; color: var(--text); }
+    .kpi-lbl { font-size: 12px; letter-spacing: 1px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
+    .kpi-val { font-family: var(--font-mono); font-size: 24px; color: var(--text); }
     .kpi-val.c { color: var(--cyan); }
-    .kpi-sub { font-size: 12px; color: var(--text-3); }
+    .kpi-sub { font-size: 13px; color: var(--text-3); }
 
-    .basket-list { display: flex; flex-direction: column; gap: 3px; max-height: 130px; overflow-y: auto; }
+    .basket-list { display: flex; flex-direction: column; gap: 3px; overflow-y: auto; flex: 1; min-height: 0; }
     .brow {
-      display: flex; align-items: center; gap: 8px;
-      padding: 5px 8px; background: var(--elevated); border-radius: 5px;
-      font-family: var(--font-mono); font-size: 11px; color: var(--text-2);
+      display: flex; align-items: center; gap: 0;
+      padding: 6px 8px; background: var(--elevated); border-radius: 5px;
+      font-family: var(--font-mono); font-size: 13px; color: var(--text-2);
     }
-    .brow-unit { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-3); width: 38px; }
-    .brow-wt { color: var(--cyan); }
-    .brow-cuts { color: var(--text-3); margin-left: auto; }
-    .brow-ts { font-size: 9px; color: var(--text-3); margin-left: 8px; }
+    .brow-num  { min-width: 32px; color: var(--text-3); font-size: 12px; flex-shrink: 0; }
+    .brow-time { min-width: 68px; color: var(--text-2); flex-shrink: 0; }
+    .brow-cuts { min-width: 72px; color: var(--text-3); text-align: right; flex-shrink: 0; }
+    .brow-wt   { min-width: 60px; color: var(--cyan); text-align: right; flex-shrink: 0; }
+    .brow-tp   { min-width: 60px; color: var(--green); text-align: right; font-size: 12px; flex-shrink: 0; }
+    .brow-ts   { flex: 1; text-align: right; font-size: 11px; color: var(--text-3); }
 
     #prod-history { flex-direction: column; padding: 12px 16px; gap: 8px; }
     .hist-toolbar { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
@@ -586,8 +601,8 @@
     .btn-csv:hover { border-color: var(--border-hi); color: var(--text-2); }
     .hist-scroll { flex: 1; overflow-y: auto; }
     .hist-scroll table { width: 100%; border-collapse: collapse; }
-    .hist-scroll th { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-3); text-align: left; padding: 7px 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; position: sticky; top: 0; background: var(--bg); }
-    .hist-scroll td { font-family: var(--font-mono); font-size: 14px; color: var(--text-2); padding: 10px 12px; border-bottom: 1px solid rgba(26,45,64,0.5); }
+    .hist-scroll th { font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--text-3); text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; position: sticky; top: 0; background: var(--bg); }
+    .hist-scroll td { font-family: var(--font-mono); font-size: 14px; color: var(--text-2); padding: 10px 10px; border-bottom: 1px solid rgba(26,45,64,0.5); }
     .hist-scroll tr:hover td { background: rgba(255,255,255,0.02); cursor: pointer; }
     .td-wo { color: var(--cyan) !important; }
     .td-mat { font-family: var(--font) !important; font-size: 13px !important; font-weight: 600; color: var(--text) !important; }
@@ -737,48 +752,31 @@
       border-radius: 16px; padding: 32px 36px; min-width: 440px;
       box-shadow: 0 24px 64px rgba(0,0,0,0.65);
     }
-    .modal-title { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--text); text-transform: uppercase; margin-bottom: 4px; }
-    .modal-sub   { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+    .modal-title { font-size: 24px; font-weight: 700; letter-spacing: 2px; color: var(--text); text-transform: uppercase; margin-bottom: 4px; }
+    .modal-sub   { font-size: 15px; color: var(--text-3); margin-bottom: 24px; }
     .modal-meta  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
     .mmeta { background: var(--surface); border-radius: 8px; padding: 10px 14px; }
-    .mmeta-lbl { font-size: 10px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-    .mmeta-val { font-family: var(--font-mono); font-size: 18px; color: var(--text-2); }
+    .mmeta-lbl { font-size: 12px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .mmeta-val { font-family: var(--font-mono); font-size: 22px; color: var(--text-2); }
     .modal-field { margin-bottom: 18px; }
-    .modal-lbl { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; }
+    .modal-lbl { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; color: var(--text-3); text-transform: uppercase; margin-bottom: 8px; }
     .modal-input {
       width: 100%; background: var(--surface); border: 1px solid var(--border-hi);
-      border-radius: 9px; padding: 12px 16px;
-      font-family: var(--font-mono); font-size: 22px; color: var(--text);
+      border-radius: 9px; padding: 13px 16px;
+      font-family: var(--font-mono); font-size: 26px; color: var(--text);
       outline: none; text-align: center; letter-spacing: 2px;
     }
     .modal-input:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,200,240,0.12); }
     .modal-input.err  { border-color: var(--red); }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
-    .modal-cancel  { padding: 12px 24px; background: transparent; border: 1px solid var(--border-hi); border-radius: 9px; color: var(--text-3); font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
-    .modal-confirm { padding: 12px 28px; border-radius: 9px; font-family: var(--font); font-size: 13px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
+    .modal-cancel  { padding: 13px 26px; background: transparent; border: 1px solid var(--border-hi); border-radius: 9px; color: var(--text-3); font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
+    .modal-confirm { padding: 13px 30px; border-radius: 9px; font-family: var(--font); font-size: 15px; font-weight: 700; letter-spacing: 1.5px; cursor: pointer; }
     .modal-confirm.c-cyan  { background: var(--cyan-dim); border: 1px solid var(--cyan); color: var(--cyan); }
     .modal-confirm.c-amber { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
     .modal-confirm:hover { opacity: 0.85; }
 
-    /* End Work modal */
-    .ew-units { display: flex; gap: 10px; margin-bottom: 18px; }
-    .ew-unit { flex: 1; background: var(--surface); border: 1px solid var(--border-hi); border-radius: 8px; padding: 14px 16px; }
-    .ew-unit-name { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); margin-bottom: 10px; text-transform: uppercase; }
-    .ew-meta { font-family: var(--font-mono); font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
-
-    /* End Work modal — 40% larger fonts throughout */
-    #modal-endwork .modal-title   { font-size: 28px; }
-    #modal-endwork .modal-sub     { font-size: 18px; margin-bottom: 28px; }
-    #modal-endwork .ew-unit-name  { font-size: 17px; letter-spacing: 2px; }
-    #modal-endwork .ew-meta       { font-size: 18px; }
-    #modal-endwork .modal-lbl     { font-size: 15px; letter-spacing: 1.5px; margin-bottom: 10px; }
-    #modal-endwork .modal-lbl span { font-size: 12px !important; }
-    #modal-endwork .modal-input   { font-size: 30px; padding: 14px 18px; }
-    #modal-endwork .mmeta-lbl     { font-size: 13px; letter-spacing: 1px; }
-    #modal-endwork .mmeta-val     { font-size: 24px; }
-    #modal-endwork .modal-cancel  { font-size: 17px; padding: 14px 28px; }
-    #modal-endwork .modal-confirm { font-size: 17px; padding: 14px 32px; }
-    #modal-endwork               { min-width: 520px; }
+    /* End Work modal — inherits base modal sizes, just set min-width */
+    #modal-endwork { min-width: 460px; }
 
     /* ── KEYFRAMES ───────────────────────────── */
     @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.55;transform:scale(0.8)} }
@@ -935,6 +933,8 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
+    <!-- Hamburger — collapses nav -->
+    <button class="nav-ham-btn" onclick="toggleNav()" title="Toggle navigation">☰</button>
     <!-- LEFT: machine status -->
     <div class="state-pill idle" id="state-pill">
       <div class="state-dot" id="state-dot"></div>
@@ -1078,11 +1078,13 @@
         <div class="manual-unit">
           <div class="manual-unit-name">Front</div>
           <button class="btn-cut" onclick="manualCut('f')">CUT</button>
+          <div class="manual-count" id="m-f-count">Today: 0 cuts</div>
         </div>
         <div class="col-divider" style="margin:20px 0"></div>
         <div class="manual-unit">
           <div class="manual-unit-name">Rear</div>
           <button class="btn-cut" onclick="manualCut('r')">CUT</button>
+          <div class="manual-count" id="m-r-count">Today: 0 cuts</div>
         </div>
       </div>
     </div>
@@ -1097,38 +1099,57 @@
 
         <!-- ── ACTIVE WO ─────────────────────── -->
         <div class="prod-panel active" id="prod-active">
-          <div class="pcard">
+          <!-- Left: KPIs -->
+          <div class="pcard" style="flex:0 0 auto;min-width:270px;max-width:290px;display:flex;flex-direction:column;gap:8px">
             <div class="pcard-title" id="p-wo-title">No active work order</div>
-            <div class="kpi-grid kpi-grid-3">
+            <div class="kpi-grid">
               <div class="kpi">
-                <div class="kpi-lbl">Total Cuts</div>
+                <div class="kpi-lbl">Cut Pieces</div>
                 <div class="kpi-val" id="p-cuts">0</div>
-                <div class="kpi-sub">Both units combined</div>
+                <div class="kpi-sub">Total both units</div>
               </div>
+              <div class="kpi">
+                <div class="kpi-lbl">CP Throughput</div>
+                <div class="kpi-val" id="p-cp-tp">—</div>
+                <div class="kpi-sub">kg/h · per unit</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">Total CP Weight</div>
+                <div class="kpi-val" id="p-total-weight">—</div>
+                <div class="kpi-sub">Both units (kg)</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">RL Throughput avg</div>
+                <div class="kpi-val c" id="p-throughput">—</div>
+                <div class="kpi-sub">kg/h</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-lbl">RL Total</div>
+                <div class="kpi-val c" id="p-rl-total">—</div>
+                <div class="kpi-sub">kg</div>
+              </div>
+              <div class="kpi" id="p-waste-kpi">
+                <div class="kpi-lbl">Waste %</div>
+                <div class="kpi-val" id="p-waste" style="color:var(--amber)">—</div>
+              </div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="kpi">
                 <div class="kpi-lbl">WO Runtime</div>
-                <div class="kpi-val" id="p-runtime">—</div>
-                <div class="kpi-sub">Since WO started</div>
+                <div class="kpi-val" id="p-runtime" style="font-size:18px">—</div>
               </div>
               <div class="kpi">
-                <div class="kpi-lbl">Current Basket</div>
-                <div class="kpi-val" id="p-basket-num">—</div>
+                <div class="kpi-lbl">Basket #</div>
+                <div class="kpi-val" id="p-basket-num" style="font-size:18px">—</div>
                 <div class="kpi-sub" id="p-basket-sub">—</div>
-              </div>
-              <div class="kpi">
-                <div class="kpi-lbl">Cut Pieces Weight</div>
-                <div class="kpi-val" id="p-total-weight">—</div>
-                <div class="kpi-sub">From logged baskets</div>
-              </div>
-              <div class="kpi" style="grid-column: span 2">
-                <div class="kpi-lbl">RL Throughput (avg)</div>
-                <div class="kpi-val c" id="p-throughput">—</div>
-                <div class="kpi-sub">Recycling line · kg/h</div>
               </div>
             </div>
           </div>
-          <div class="pcard" style="flex:1; min-height:0">
-            <div class="pcard-title">Basket Log</div>
+          <!-- Right: Basket log -->
+          <div class="pcard" style="flex:1;min-height:0;display:flex;flex-direction:column">
+            <div class="pcard-title" style="margin-bottom:6px">Basket Log
+              <span style="font-size:10px;font-weight:400;color:var(--text-3);letter-spacing:0;margin-left:6px;text-transform:none">#&nbsp;&nbsp;&nbsp;runtime&nbsp;&nbsp;&nbsp;cuts&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;weight&nbsp;&nbsp;RL kg/h</span>
+            </div>
             <div class="basket-list" id="live-basket-list">
               <div class="brow-empty">No baskets logged yet</div>
             </div>
@@ -1151,21 +1172,21 @@
           <div class="hist-scroll">
             <table id="hist-table">
               <thead>
-                <tr><th>WO</th><th>Material</th><th>Started</th><th>Ended</th><th>Cuts</th><th>Rejects Wt</th><th>Runtime</th><th>Baskets</th></tr>
+                <tr><th>WO ID</th><th>Material</th><th>Start</th><th>End</th><th>Duration</th><th>RL Tp (kg/h)</th><th>RL Total (kg)</th><th>CP Weight (kg)</th></tr>
               </thead>
               <tbody id="hist-tbody">
-                <tr onclick="openWODetail(this)" data-wo="WO-0041" data-mat="PE-LD Clean" data-start="29 Apr 06:12" data-end="29 Apr 10:45" data-cuts="8,241" data-wt="97.4 kg" data-rt="4h 33m" data-baskets="8">
-                  <td class="td-wo">WO-0041</td><td class="td-mat">PE-LD Clean</td><td>29 Apr 06:12</td><td>29 Apr 10:45</td><td>8,241</td><td>97.4 kg</td><td>4h 33m</td><td>8</td></tr>
-                <tr onclick="openWODetail(this)" data-wo="WO-0040" data-mat="PP Standard" data-start="29 Apr 11:00" data-end="29 Apr 14:22" data-cuts="6,104" data-wt="72.1 kg" data-rt="3h 22m" data-baskets="6">
-                  <td class="td-wo">WO-0040</td><td class="td-mat">PP Standard</td><td>29 Apr 11:00</td><td>29 Apr 14:22</td><td>6,104</td><td>72.1 kg</td><td>3h 22m</td><td>6</td></tr>
-                <tr onclick="openWODetail(this)" data-wo="WO-0039" data-mat="EVA Foam" data-start="28 Apr 07:30" data-end="28 Apr 11:18" data-cuts="4,882" data-wt="58.6 kg" data-rt="3h 48m" data-baskets="5">
-                  <td class="td-wo">WO-0039</td><td class="td-mat">EVA Foam</td><td>28 Apr 07:30</td><td>28 Apr 11:18</td><td>4,882</td><td>58.6 kg</td><td>3h 48m</td><td>5</td></tr>
-                <tr onclick="openWODetail(this)" data-wo="WO-0038" data-mat="PE-LD w/ Organics" data-start="28 Apr 12:00" data-end="28 Apr 16:01" data-cuts="5,430" data-wt="63.2 kg" data-rt="4h 01m" data-baskets="6">
-                  <td class="td-wo">WO-0038</td><td class="td-mat">PE-LD w/ Organics</td><td>28 Apr 12:00</td><td>28 Apr 16:01</td><td>5,430</td><td>63.2 kg</td><td>4h 01m</td><td>6</td></tr>
-                <tr onclick="openWODetail(this)" data-wo="WO-0037" data-mat="PE-LD Clean" data-start="27 Apr 05:58" data-end="27 Apr 11:00" data-cuts="9,120" data-wt="108.1 kg" data-rt="5h 02m" data-baskets="9">
-                  <td class="td-wo">WO-0037</td><td class="td-mat">PE-LD Clean</td><td>27 Apr 05:58</td><td>27 Apr 11:00</td><td>9,120</td><td>108.1 kg</td><td>5h 02m</td><td>9</td></tr>
-                <tr onclick="openWODetail(this)" data-wo="WO-0036" data-mat="PP Standard" data-start="27 Apr 11:30" data-end="27 Apr 15:35" data-cuts="7,330" data-wt="86.7 kg" data-rt="4h 05m" data-baskets="7">
-                  <td class="td-wo">WO-0036</td><td class="td-mat">PP Standard</td><td>27 Apr 11:30</td><td>27 Apr 15:35</td><td>7,330</td><td>86.7 kg</td><td>4h 05m</td><td>7</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0041" data-mat="PE-LD Clean" data-start="29 Apr 06:12" data-end="29 Apr 10:45" data-rt="4h 33m" data-rl-tp="44.2" data-rl-total="201.5" data-cut-wt="97.4">
+                  <td class="td-wo">WO-0041</td><td class="td-mat">PE-LD Clean</td><td>29 Apr 06:12</td><td>29 Apr 10:45</td><td>4h 33m</td><td>44.2</td><td>201.5</td><td>97.4</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0040" data-mat="PP Standard" data-start="29 Apr 11:00" data-end="29 Apr 14:22" data-rt="3h 22m" data-rl-tp="38.6" data-rl-total="130.2" data-cut-wt="72.1">
+                  <td class="td-wo">WO-0040</td><td class="td-mat">PP Standard</td><td>29 Apr 11:00</td><td>29 Apr 14:22</td><td>3h 22m</td><td>38.6</td><td>130.2</td><td>72.1</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0039" data-mat="EVA Foam" data-start="28 Apr 07:30" data-end="28 Apr 11:18" data-rt="3h 48m" data-rl-tp="—" data-rl-total="—" data-cut-wt="58.6">
+                  <td class="td-wo">WO-0039</td><td class="td-mat">EVA Foam</td><td>28 Apr 07:30</td><td>28 Apr 11:18</td><td>3h 48m</td><td>—</td><td>—</td><td>58.6</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0038" data-mat="PE-LD w/ Organics" data-start="28 Apr 12:00" data-end="28 Apr 16:01" data-rt="4h 01m" data-rl-tp="31.8" data-rl-total="127.7" data-cut-wt="63.2">
+                  <td class="td-wo">WO-0038</td><td class="td-mat">PE-LD w/ Organics</td><td>28 Apr 12:00</td><td>28 Apr 16:01</td><td>4h 01m</td><td>31.8</td><td>127.7</td><td>63.2</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0037" data-mat="PE-LD Clean" data-start="27 Apr 05:58" data-end="27 Apr 11:00" data-rt="5h 02m" data-rl-tp="46.1" data-rl-total="232.2" data-cut-wt="108.1">
+                  <td class="td-wo">WO-0037</td><td class="td-mat">PE-LD Clean</td><td>27 Apr 05:58</td><td>27 Apr 11:00</td><td>5h 02m</td><td>46.1</td><td>232.2</td><td>108.1</td></tr>
+                <tr onclick="openWODetail(this)" data-wo="WO-0036" data-mat="PP Standard" data-start="27 Apr 11:30" data-end="27 Apr 15:35" data-rt="4h 05m" data-rl-tp="39.4" data-rl-total="161.1" data-cut-wt="86.7">
+                  <td class="td-wo">WO-0036</td><td class="td-mat">PP Standard</td><td>27 Apr 11:30</td><td>27 Apr 15:35</td><td>4h 05m</td><td>39.4</td><td>161.1</td><td>86.7</td></tr>
               </tbody>
             </table>
           </div>
@@ -1318,21 +1339,26 @@
       </div>
 
       <!-- End Work modal -->
-      <div class="modal" id="modal-endwork" style="display:none;min-width:400px">
+      <div class="modal" id="modal-endwork" style="display:none">
         <div class="modal-title">End Work Order</div>
         <div class="modal-sub" id="ew-sub">WO-0042 · PE-LD Clean</div>
-        <div class="ew-unit" style="margin-bottom:16px">
-          <div class="ew-unit-name">Final Basket — #<span id="ew-basket-num">1</span></div>
-          <div class="ew-meta" id="ew-meta">0 cuts · 00:00:00</div>
-          <div class="modal-field" style="margin-bottom:0">
-            <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
-            <input class="modal-input" id="ew-wt" type="number" placeholder="" step="0.1" min="0" style="font-size:14px;padding:7px 12px;letter-spacing:0">
+        <div class="modal-meta">
+          <div class="mmeta">
+            <div class="mmeta-lbl">Final Basket — #<span id="ew-basket-num">1</span></div>
+            <div class="mmeta-val" id="ew-cuts">0</div>
+          </div>
+          <div class="mmeta">
+            <div class="mmeta-lbl">Runtime</div>
+            <div class="mmeta-val" id="ew-runtime">00:00:00</div>
           </div>
         </div>
-        <div class="modal-field" style="margin-bottom:20px">
-          <div class="modal-lbl">Output Recycling Machine (kg/hour) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional — clean plastic output rate)</span></div>
-          <input class="modal-input" id="ew-output-wt" type="number" placeholder="e.g. 45.0" step="0.1" min="0" style="font-size:16px;padding:7px 12px;letter-spacing:0">
-          <div style="font-size:11px;color:var(--text-3);margin-top:5px;text-align:center" id="ew-output-calc"></div>
+        <div class="modal-field">
+          <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
+          <input class="modal-input" id="ew-wt" type="number" placeholder="" step="0.1" min="0" style="letter-spacing:0">
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Recycling Line Throughput <span style="font-size:10px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">kg/h &nbsp;(optional)</span></div>
+          <input class="modal-input" id="ew-throughput" type="number" placeholder="" step="0.1" min="0" style="letter-spacing:0">
         </div>
         <div class="modal-actions">
           <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -1393,12 +1419,18 @@
       </div>
 
       <!-- Cut Cycle edit modal -->
-      <div class="modal" id="modal-rate" style="display:none;min-width:280px">
+      <div class="modal" id="modal-rate" style="display:none;min-width:300px">
         <div class="modal-title">Cut Cycle</div>
         <div class="modal-sub">Target cuts per minute for active WO</div>
         <div class="modal-field">
           <div class="modal-lbl">Cycle (c / min)</div>
           <input class="modal-input" id="rate-input" type="number" placeholder="24" min="1" max="60" step="1" style="font-size:36px;letter-spacing:-1px">
+        </div>
+        <div class="modal-field" style="margin-bottom:12px">
+          <label style="display:flex;align-items:center;gap:14px;cursor:pointer" onclick="toggleDoubleCut()">
+            <div class="toggle-track" id="dc-toggle"></div>
+            <span style="font-size:15px;color:var(--text-2)">Double Cut &nbsp;<span style="font-size:12px;color:var(--text-3)">(2× cycles per cut)</span></span>
+          </label>
         </div>
         <div class="modal-actions">
           <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -1512,6 +1544,7 @@ let state = 'idle'; // running | idle | fault | estop
 let sensorOn = true;
 let fCuts = 0, rCuts = 0, totalCuts = 0;
 let woSec = 0;
+let activeSec = 0; // increments only when state=running AND sensorOn=true
 let mFront = 0, mRear = 0;
 let faultUnit = '';
 // Shared single-basket tracking (both units combined)
@@ -1535,6 +1568,7 @@ let rBladeCuts = 1400;
 let bcUnit = 'FRONT'; // selected unit in blade change modal
 let cutTimerPausedAt = 0; // Date.now() when cut-ago timer was frozen, 0 = running
 const airCfg = { active: false, delay: 2.0, pulse: 0.5 };
+let doubleCutMode = false; // per-session double-cut override
 
 // ── Clock & Timers ────────────────────────────────
 function tick() {
@@ -1547,6 +1581,7 @@ function tick() {
   if (timerActive) {
     woSec++;
     basketSec++;
+    activeSec++;
     // Update "last cut" displays — format: X.Xs below 60s, m:ss above
     const nowMs = Date.now();
     const fEl = document.getElementById('fc-ago');
@@ -1565,6 +1600,8 @@ function tick() {
   if (pBn) pBn.textContent = basketNum;
   const pBs = document.getElementById('p-basket-sub');
   if (pBs) pBs.textContent = basketCuts.toLocaleString() + ' cuts · ' + fmtSec(basketSec);
+  // Update computed production KPIs every tick
+  updateProdComputed();
 
   // Basket weigh reminder — neutral animation after configured cut count
   const bb = document.getElementById('btn-basket');
@@ -1849,10 +1886,16 @@ function openWODetail(row) {
   document.getElementById('wod-sub').textContent   = row.dataset.mat;
   document.getElementById('wod-start').textContent = row.dataset.start;
   document.getElementById('wod-end').textContent   = row.dataset.end;
-  document.getElementById('wod-cuts').textContent  = row.dataset.cuts;
-  document.getElementById('wod-wt').textContent    = row.dataset.wt;
-  document.getElementById('wod-rt').textContent    = row.dataset.rt;
-  document.getElementById('wod-baskets').textContent = row.dataset.baskets;
+  document.getElementById('wod-cuts').textContent  = row.dataset.rt || '—';
+  document.getElementById('wod-wt').textContent    = row.dataset.cutWt ? row.dataset.cutWt + ' kg' : '—';
+  document.getElementById('wod-rt').textContent    = row.dataset.rlTp ? row.dataset.rlTp + ' kg/h' : '—';
+  document.getElementById('wod-baskets').textContent = row.dataset.rlTotal ? row.dataset.rlTotal + ' kg' : '—';
+  // Update labels in detail modal
+  const labels = document.querySelectorAll('#modal-wo-detail .kpi-lbl');
+  if (labels[2]) labels[2].textContent = 'Duration';
+  if (labels[3]) labels[3].textContent = 'Cut Pieces Wt';
+  if (labels[4]) labels[4].textContent = 'RL Throughput';
+  if (labels[5]) labels[5].textContent = 'RL Total';
   showModal('modal-wo-detail');
 }
 
@@ -1872,8 +1915,9 @@ function confirmBasket() {
   const now = new Date();
   const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
   basketLog.push({ num: basketNum, cuts: basketCuts, sec: basketSec, wt: wtVal, throughput: tpVal, ts });
-  if (wtVal > 0) { totalWt += wtVal; updateProdActiveWt(); }
-  if (tpVal > 0) { rlThroughputTotal += tpVal; rlThroughputCount++; updateProdThroughput(); }
+  if (wtVal > 0) { totalWt += wtVal; }
+  if (tpVal > 0) { rlThroughputTotal += tpVal; rlThroughputCount++; }
+  updateProdComputed();
   document.getElementById('mb-throughput').value = '';
   // Reset shared basket counters
   basketCuts = 0; basketSec = 0; basketNum++;
@@ -1893,51 +1937,75 @@ function renderLiveBasketList() {
   }
   el.innerHTML = [...basketLog].reverse().map(b => `
     <div class="brow">
-      <span class="brow-unit">#${b.num}</span>
-      <span style="font-size:11px;color:var(--text-2)">${fmtSec(b.sec)}</span>
-      <span class="brow-cuts">${b.cuts.toLocaleString()} cuts</span>
-      ${b.wt > 0 ? `<span class="brow-wt">&nbsp;${b.wt.toFixed(1)} kg</span>` : ''}
-      ${b.throughput > 0 ? `<span style="color:var(--green);font-size:9px">&nbsp;${b.throughput.toFixed(1)} kg/h</span>` : ''}
+      <span class="brow-num">#${b.num}</span>
+      <span class="brow-time">${fmtSec(b.sec)}</span>
+      <span class="brow-cuts">${b.cuts.toLocaleString()}</span>
+      <span class="brow-wt">${b.wt > 0 ? b.wt.toFixed(1) + ' kg' : '—'}</span>
+      <span class="brow-tp">${b.throughput > 0 ? b.throughput.toFixed(1) + ' kg/h' : '—'}</span>
       <span class="brow-ts">${b.ts}</span>
     </div>`).join('');
 }
 
+function calcCpThroughput() {
+  // average of (basket_wt / basket_runtime_h) for baskets with both wt and runtime
+  const valid = basketLog.filter(b => b.wt > 0 && b.sec > 60);
+  if (valid.length === 0) return 0;
+  const sum = valid.reduce((acc, b) => acc + (b.wt / (b.sec / 3600)), 0);
+  return sum / valid.length;
+}
+
 function updateProdActiveWt() {
-  const el = document.getElementById('p-total-weight');
-  if (el) el.textContent = totalWt > 0 ? totalWt.toFixed(1) + ' kg' : '—';
+  // kept for compatibility — updateProdComputed handles the new IDs
+  updateProdComputed();
 }
 function updateProdThroughput() {
-  const el = document.getElementById('p-throughput');
-  if (!el) return;
-  if (rlThroughputCount === 0) { el.textContent = '—'; return; }
-  const avg = rlThroughputTotal / rlThroughputCount;
-  el.textContent = avg.toFixed(1) + ' kg/h';
+  updateProdComputed();
+}
+
+function updateProdComputed() {
+  const rlAvg = rlThroughputCount > 0 ? rlThroughputTotal / rlThroughputCount : 0;
+  const cpTp  = calcCpThroughput();
+  const hrs   = activeSec / 3600;
+
+  // Cut pieces weight = per-unit throughput × hours × 2 units
+  const totalCpWt = cpTp > 0 ? cpTp * hrs * 2 : 0;
+  // RL total = RL avg throughput × active hours
+  const rlTotal   = rlAvg * hrs;
+  // Waste % = cut pieces wt / RL total × 100
+  const waste     = (rlTotal > 0 && totalCpWt > 0) ? (totalCpWt / rlTotal * 100) : null;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+  set('p-total-weight', totalCpWt > 0 ? totalCpWt.toFixed(1) + ' kg' : '—');
+  set('p-cp-tp',        cpTp > 0      ? cpTp.toFixed(1) + ' kg/h'   : '—');
+  set('p-throughput',   rlAvg > 0     ? rlAvg.toFixed(1) + ' kg/h'  : '—');
+  set('p-rl-total',     rlTotal > 0   ? rlTotal.toFixed(1) + ' kg'  : '—');
+  if (waste !== null) {
+    set('p-waste', waste.toFixed(1) + '%');
+  } else {
+    set('p-waste', '—');
+  }
 }
 function openEndWork() {
   const woNum = document.getElementById('wo-num').textContent;
   const woMat = document.getElementById('wo-mat').textContent;
   document.getElementById('ew-sub').textContent = woNum + ' · ' + woMat;
   document.getElementById('ew-basket-num').textContent = basketNum;
-  document.getElementById('ew-meta').textContent = `${basketCuts} cuts · ${fmtSec(basketSec)}`;
+  document.getElementById('ew-cuts').textContent = basketCuts.toLocaleString();
+  document.getElementById('ew-runtime').textContent = fmtSec(basketSec);
   document.getElementById('ew-wt').value = '';
-  const ewOut = document.getElementById('ew-output-wt');
-  ewOut.value = '';
-  // live calc hint
-  const calcEl = document.getElementById('ew-output-calc');
-  if (calcEl) calcEl.textContent = '';
-  ewOut.oninput = () => {
-    const rate = parseFloat(ewOut.value);
-    if (!calcEl) return;
-    if (rate > 0) {
-      const hrs = woSec / 3600;
-      calcEl.textContent = `→ Total output: ${(rate * hrs).toFixed(1)} kg  (${hrs.toFixed(2)} h sensor-active)`;
-    } else {
-      calcEl.textContent = '';
-    }
-  };
+  document.getElementById('ew-throughput').value = '';
   showModal('modal-endwork');
 }
 function confirmEndWork() {
+  const wtVal = parseFloat(document.getElementById('ew-wt').value) || 0;
+  const tpVal = parseFloat(document.getElementById('ew-throughput').value) || 0;
+  if (wtVal > 0) { totalWt += wtVal; }
+  if (tpVal > 0) { rlThroughputTotal += tpVal; rlThroughputCount++; }
+  // record final basket
+  const now = new Date();
+  const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  basketLog.push({ num: basketNum, cuts: basketCuts, sec: basketSec, wt: wtVal, throughput: tpVal, ts });
   closeModal();
   // Clear WO so action bar returns to "New WO" state
   document.getElementById('wo-num').textContent  = '—';
@@ -1946,6 +2014,7 @@ function confirmEndWork() {
   const pWoTitle = document.getElementById('p-wo-title');
   if (pWoTitle) pWoTitle.textContent = 'No active work order';
   woStarted = false;
+  activeSec = 0;
   state = 'idle';
   applyState();
 }
@@ -2209,8 +2278,12 @@ function confirmNewWO() {
   const dsBadge = document.getElementById('ds-badge');
   if (dsBadge) dsBadge.style.display = m.ds ? '' : 'none';
   // Reset all counters
-  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0;
+  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0; activeSec = 0;
   basketCuts = 0; basketSec = 0; basketNum = 1;
+  // Initialize double-cut mode from material
+  doubleCutMode = m.ds || false;
+  const dsBadge2 = document.getElementById('ds-badge');
+  if (dsBadge2) dsBadge2.style.display = doubleCutMode ? '' : 'none';
   document.getElementById('fr').textContent = '0';
   document.getElementById('rr').textContent = '0';
   const lbl = document.getElementById('basket-num-lbl');
@@ -2224,9 +2297,8 @@ function confirmNewWO() {
   // Reset basket log & production screen
   woStarted = false;
   basketLog = []; totalWt = 0; rlThroughputTotal = 0; rlThroughputCount = 0;
-  updateProdThroughput();
   renderLiveBasketList();
-  updateProdActiveWt();
+  updateProdComputed();
   const pWoTitle = document.getElementById('p-wo-title');
   if (pWoTitle) pWoTitle.textContent = woNum + ' · ' + m.name;
   const pRun = document.getElementById('p-runtime');
@@ -2326,10 +2398,25 @@ function updateAdminChip() {
   }
 }
 
+// ── Nav toggle ────────────────────────────────────
+function toggleNav() {
+  document.querySelector('.nav-bar').classList.toggle('collapsed');
+}
+
+// ── Double-cut toggle (in rate modal) ────────────
+function toggleDoubleCut() {
+  doubleCutMode = !doubleCutMode;
+  const track = document.getElementById('dc-toggle');
+  if (track) track.className = 'toggle-track' + (doubleCutMode ? ' on' : '');
+}
+
 // ── Rate edit ─────────────────────────────────────
 function openRateEdit() {
   document.getElementById('rate-input').value = cfgRate;
   document.getElementById('rate-input').classList.remove('err');
+  // Sync double-cut toggle
+  const track = document.getElementById('dc-toggle');
+  if (track) track.className = 'toggle-track' + (doubleCutMode ? ' on' : '');
   showModal('modal-rate');
 }
 function confirmRateEdit() {
@@ -2337,6 +2424,9 @@ function confirmRateEdit() {
   if (!v || v < 1 || v > 60) { document.getElementById('rate-input').classList.add('err'); return; }
   cfgRate = v;
   document.getElementById('shared-rate').textContent = cfgRate;
+  // Update ds-badge to reflect doubleCutMode
+  const badge = document.getElementById('ds-badge');
+  if (badge) badge.style.display = doubleCutMode ? '' : 'none';
   // Reschedule cuts immediately with new rate
   if (state === 'running') initCutSchedule();
   closeModal();
@@ -2354,7 +2444,7 @@ function demoNewWO() {
     if (fi) fi.classList.remove('show');
   });
   document.getElementById('wo-num').textContent = '—';
-  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0;
+  fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0; activeSec = 0;
   basketCuts = 0; basketSec = 0; basketNum = 1;
   const lbl = document.getElementById('basket-num-lbl');
   if (lbl) lbl.textContent = '1';
