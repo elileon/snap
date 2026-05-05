@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SNAP·CUT Logo Preview</title>
+<style>
+  body { background: #e8e8e8; font-family: Arial, sans-serif; padding: 40px; }
+  .row { display: flex; flex-direction: column; gap: 32px; }
+  .card { background: white; padding: 32px 40px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+  .card.dark { background: #1a2030; }
+  .label { font-size: 11px; font-weight: 600; letter-spacing: 2px; color: #888; text-transform: uppercase; margin-bottom: 16px; }
+  .card.dark .label { color: #556; }
+  img { display: block; max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="card">
+    <div class="label">Primary (blade from right)</div>
+    <img src="logo.svg">
+  </div>
+  <div class="card">
+    <div class="label">Pro Mark — cylinder + blade + pellet</div>
+    <img src="logo-pro.svg">
+  </div>
+  <div class="card dark">
+    <div class="label">Dark / reversed</div>
+    <img src="logo-dark.svg">
+  </div>
+  <div class="card">
+    <div class="label">Blade from left (LTR)</div>
+    <img src="logo-ltr.svg">
+  </div>
+  <div class="card">
+    <div class="label">Concept B — sphere as hero</div>
+    <img src="logo-b.svg">
+  </div>
+  <div class="card">
+    <div class="label">Green / recycling variant</div>
+    <img src="logo-green.svg">
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SNAP·CUT — Professional Mark
+  Three acts, one story: rod → cut → pellet.
+  Geometry: cylinder stub (53 % badge width) feeds from top.
+  A precision steel blade enters from the right, tip at 83 % depth.
+  The output pellet drops below — slightly cropped by the badge ring,
+  giving the sensation of falling free.
+  The badge circle itself reads as a polished pellet (dome highlight).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" width="520" height="160">
+<defs>
+
+  <!-- Cylinder: deep industrial metal, warm-shifted highlight -->
+  <linearGradient id="cyl-p" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%"   stop-color="#030810"/>
+    <stop offset="16%"  stop-color="#0C1E34"/>
+    <stop offset="44%"  stop-color="#183858"/>
+    <stop offset="72%"  stop-color="#0E2238"/>
+    <stop offset="100%" stop-color="#040B18"/>
+  </linearGradient>
+  <radialGradient id="cyl-cap-p" cx="36%" cy="28%" r="70%">
+    <stop offset="0%"   stop-color="#26486A"/>
+    <stop offset="55%"  stop-color="#102638"/>
+    <stop offset="100%" stop-color="#071420"/>
+  </radialGradient>
+
+  <!-- Blade: premium five-stop metallic steel -->
+  <linearGradient id="blade-p" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#506070"/>
+    <stop offset="20%"  stop-color="#8AAABB"/>
+    <stop offset="50%"  stop-color="#C8E2F2"/>
+    <stop offset="80%"  stop-color="#6E90A2"/>
+    <stop offset="100%" stop-color="#3A4C5A"/>
+  </linearGradient>
+  <linearGradient id="blade-shad-p" x1="100%" y1="0%" x2="0%" y2="0%">
+    <stop offset="0%"   stop-color="rgba(0,0,0,0)"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.36)"/>
+  </linearGradient>
+
+  <!-- Sphere: luminous deep-blue output pellet, 5-stop radial -->
+  <radialGradient id="sph-p" cx="27%" cy="19%" r="74%">
+    <stop offset="0%"   stop-color="#3C6C92"/>
+    <stop offset="18%"  stop-color="#20466A"/>
+    <stop offset="48%"  stop-color="#0E2440"/>
+    <stop offset="78%"  stop-color="#071828"/>
+    <stop offset="100%" stop-color="#030D1C"/>
+  </radialGradient>
+
+  <!-- Badge dome: makes the circular badge read as a polished sphere -->
+  <radialGradient id="dome-p" cx="34%" cy="18%" r="72%">
+    <stop offset="0%"   stop-color="rgba(255,255,255,0.08)"/>
+    <stop offset="60%"  stop-color="rgba(255,255,255,0.02)"/>
+    <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+  </radialGradient>
+
+  <clipPath id="badge-p"><circle cx="76" cy="80" r="56"/></clipPath>
+
+  <!-- Blade tip glow — the energy of the cut -->
+  <filter id="tg-p" x="-300%" y="-300%" width="700%" height="700%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+  <!-- Sphere ambient glow -->
+  <filter id="sg-p" x="-60%" y="-60%" width="220%" height="220%">
+    <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
+    <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+
+</defs>
+
+<!-- Badge shadow -->
+<circle cx="76" cy="84" r="56" fill="rgba(0,0,0,0.28)"/>
+<!-- Badge fill -->
+<circle cx="76" cy="80" r="56" fill="#060B16"/>
+<!-- Dome highlight — subtle 3D sphere quality on the badge itself -->
+<circle cx="76" cy="80" r="56" fill="url(#dome-p)"/>
+
+<g clip-path="url(#badge-p)">
+
+  <!-- ① CYLINDER — raw input rod, 53 % badge width (60 px) -->
+  <!-- x=46–106, y=22–68 -->
+  <rect x="46" y="22" width="60" height="46" fill="url(#cyl-p)"/>
+  <line x1="46"  y1="22" x2="46"  y2="68" stroke="#02080F" stroke-width="1.8"/>
+  <line x1="106" y1="22" x2="106" y2="68" stroke="#02080F" stroke-width="1.8"/>
+  <!-- Cap ellipse -->
+  <ellipse cx="76" cy="24" rx="30" ry="5.0" fill="url(#cyl-cap-p)"/>
+  <ellipse cx="76" cy="24" rx="30" ry="5.0" fill="none" stroke="#091C2E" stroke-width="0.85"/>
+
+  <!-- ② BLADE — precision steel, enters from right -->
+  <!--
+    Cylinder right edge = 106. Tip depth = 83 % from right:
+    106 − 0.83×60 = 106 − 49.8 ≈ 56 → tip x = 56
+    Polygon: entry(136,68) spine-end(58,68) tip(52,74) bevel-end(60,80) entry(136,80)
+  -->
+  <polygon points="136,68  58,68  52,74  60,80  136,80" fill="url(#blade-p)"/>
+  <polygon points="136,68  58,68  52,74  60,80  136,80" fill="url(#blade-shad-p)" opacity="0.40"/>
+  <!-- Spine edge -->
+  <line x1="136" y1="68" x2="58"  y2="68" stroke="#C2DCEE" stroke-width="0.85" opacity="0.55"/>
+  <!-- Bevel faces -->
+  <line x1="58"  y1="68" x2="52"  y2="74" stroke="#E6F4FF" stroke-width="1.2"  opacity="0.82"/>
+  <line x1="52"  y1="74" x2="60"  y2="80" stroke="#8CB2C6" stroke-width="0.70" opacity="0.55"/>
+  <!-- Blade back-face thickness nub -->
+  <rect x="133" y="68" width="3" height="12" rx="1" fill="#384A58"/>
+
+  <!-- Tip glow: the moment of the cut -->
+  <circle cx="52" cy="74" r="9"   fill="#00C8F8" opacity="0.20" filter="url(#tg-p)"/>
+  <circle cx="52" cy="74" r="2.8" fill="#00E8FF" opacity="0.94"/>
+  <!-- Seam line: where the cut has already passed through -->
+  <line x1="52" y1="74" x2="106" y2="74" stroke="#00D4F0" stroke-width="1.3" opacity="0.52"/>
+
+  <!-- ③ SPHERE — the clean output pellet -->
+  <!--
+    cx=76, cy=112, r=26 → bottom at y=138, badge bottom at y=136.
+    2 px is clipped: the pellet looks as if it is dropping free.
+  -->
+  <!-- Ambient glow beneath sphere -->
+  <circle cx="76" cy="112" r="32" fill="#0A3C78" opacity="0.14" filter="url(#sg-p)"/>
+  <!-- Sphere body -->
+  <circle cx="76" cy="112" r="26" fill="url(#sph-p)"/>
+  <!-- Primary specular — large, soft -->
+  <ellipse cx="64" cy="102" rx="9" ry="7"  fill="white" opacity="0.14"/>
+  <!-- Secondary specular — tight, bright -->
+  <ellipse cx="70" cy="100" rx="4" ry="3"  fill="white" opacity="0.28"/>
+  <!-- Ground shadow -->
+  <ellipse cx="76" cy="136" rx="18" ry="2.5" fill="rgba(0,0,0,0.40)"/>
+
+</g>
+
+<!-- Badge bezel ring -->
+<circle cx="76" cy="80" r="56" fill="none" stroke="#0D1E30" stroke-width="1.8"/>
+<!-- Inner depth ring — adds watch-glass quality -->
+<circle cx="76" cy="80" r="54.4" fill="none" stroke="rgba(255,255,255,0.045)" stroke-width="0.7"/>
+
+<!-- WORDMARK -->
+<text x="152" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900" fill="#0B1826" letter-spacing="-1">SNAP</text>
+<text x="327" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900" fill="#007CB4">·</text>
+<text x="350" y="94" font-family="'Arial Black','Helvetica Neue',Arial,sans-serif"
+      font-size="56" font-weight="900" fill="#0B1826" letter-spacing="-1">CUT</text>
+<line x1="152" y1="104" x2="481" y2="104" stroke="#A8B8C4" stroke-width="0.75"/>
+<text x="152" y="123" font-family="'Helvetica Neue',Arial,sans-serif"
+      font-size="11.5" font-weight="400" fill="#4E6070" letter-spacing="3.8">SMART CUT. CLEAN DROP.</text>
+
+</svg>
