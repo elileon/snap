@@ -166,7 +166,7 @@
     .logo {
       font-size: 17px; font-weight: 700;
       letter-spacing: 5px; color: var(--cyan);
-      margin-right: 20px;
+      margin-left: 20px;
     }
 
     .state-pill {
@@ -216,14 +216,15 @@
     }
     .rate-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); opacity: 0.5; }
 
-    .wo-info { display: flex; align-items: center; gap: 10px; flex: 1; }
+    .wo-info { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+    .top-spacer { flex: 1; }
     .wo-num  { font-family: var(--font-mono); font-size: 17px; color: var(--text-2); }
     .wo-sep  { color: var(--text-3); }
     .wo-mat  { font-size: 17px; font-weight: 600; letter-spacing: 1px; color: var(--text); }
     .wo-time { font-family: var(--font-mono); font-size: 15px; color: var(--text-3); }
     .wo-none { font-size: 14px; color: var(--text-3); font-style: italic; }
 
-    .top-right { display: flex; align-items: center; gap: 20px; }
+    .top-right { display: flex; align-items: center; gap: 14px; }
     .safety { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; }
     .safety .dot { width: 8px; height: 8px; border-radius: 50%; }
     .safety.ok  .dot { background: var(--green); }
@@ -557,6 +558,7 @@
     }
     .pcard-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--text-3); text-transform: uppercase; margin-bottom: 12px; }
     .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kpi-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
     .kpi { display: flex; flex-direction: column; gap: 3px; }
     .kpi-lbl { font-size: 11px; letter-spacing: 1px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
     .kpi-val { font-family: var(--font-mono); font-size: 22px; color: var(--text); }
@@ -933,29 +935,35 @@
 
   <!-- TOP BAR -->
   <div class="top-bar">
-    <div class="logo">SNAP·CUT</div>
-    <div class="state-pill running" id="state-pill">
+    <!-- LEFT: machine status -->
+    <div class="state-pill idle" id="state-pill">
       <div class="state-dot" id="state-dot"></div>
-      <span class="state-label" id="state-label">RUNNING</span>
+      <span class="state-label" id="state-label">IDLE</span>
     </div>
+    <!-- WO context: ID and material (no timer) -->
     <div class="wo-info" id="wo-info">
       <span class="wo-num" id="wo-num">—</span>
       <span class="wo-sep">·</span>
       <span class="wo-mat" id="wo-mat"></span>
-      <span class="wo-time" id="wo-time">◷ 00:00:00</span>
     </div>
-    <button class="user-chip" id="admin-chip" onclick="openAdminPin()" title="Admin access">
-      <span id="admin-icon" style="font-size:13px;line-height:1">🔒</span>
-      <span id="admin-label">OPERATOR</span>
-    </button>
+    <!-- hidden elements kept for JS compatibility -->
+    <span class="wo-time" id="wo-time" style="display:none">◷ 00:00:00</span>
+    <div id="estop-ind" class="safety estop-off" style="display:none"><div class="dot"></div><span>E-STOP</span></div>
+    <!-- flex spacer -->
+    <div class="top-spacer"></div>
+    <!-- RIGHT: user, controls, logo -->
     <div class="top-right">
-      <div class="safety estop-off" id="estop-ind"><div class="dot"></div><span>E-STOP</span></div>
+      <button class="user-chip" id="admin-chip" onclick="openAdminPin()" title="Admin access">
+        <span id="admin-icon" style="font-size:13px;line-height:1">🔒</span>
+        <span id="admin-label">OPERATOR</span>
+      </button>
       <button id="theme-btn" onclick="toggleTheme()" title="Toggle theme"
         style="background:none;border:1px solid var(--border);border-radius:6px;padding:3px 9px;cursor:pointer;
                font-size:14px;line-height:1;color:var(--text-3);transition:all 0.15s;"
         onmouseover="this.style.borderColor='var(--border-hi)';this.style.color='var(--text)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-3)'">☀</button>
       <div class="top-clock" id="clock">—</div>
+      <div class="logo">SNAP·CUT</div>
     </div>
   </div>
 
@@ -1091,7 +1099,7 @@
         <div class="prod-panel active" id="prod-active">
           <div class="pcard">
             <div class="pcard-title" id="p-wo-title">No active work order</div>
-            <div class="kpi-grid">
+            <div class="kpi-grid kpi-grid-3">
               <div class="kpi">
                 <div class="kpi-lbl">Total Cuts</div>
                 <div class="kpi-val" id="p-cuts">0</div>
@@ -1108,9 +1116,14 @@
                 <div class="kpi-sub" id="p-basket-sub">—</div>
               </div>
               <div class="kpi">
-                <div class="kpi-lbl">Total Rejects</div>
+                <div class="kpi-lbl">Cut Pieces Weight</div>
                 <div class="kpi-val" id="p-total-weight">—</div>
                 <div class="kpi-sub">From logged baskets</div>
+              </div>
+              <div class="kpi" style="grid-column: span 2">
+                <div class="kpi-lbl">RL Throughput (avg)</div>
+                <div class="kpi-val c" id="p-throughput">—</div>
+                <div class="kpi-sub">Recycling line · kg/h</div>
               </div>
             </div>
           </div>
@@ -1292,7 +1305,11 @@
         </div>
         <div class="modal-field">
           <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
-          <input class="modal-input" id="mb-weight" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="letter-spacing:0">
+          <input class="modal-input" id="mb-weight" type="number" placeholder="" step="0.1" min="0" style="letter-spacing:0">
+        </div>
+        <div class="modal-field">
+          <div class="modal-lbl">Recycling Line Throughput <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">kg/h &nbsp;(optional)</span></div>
+          <input class="modal-input" id="mb-throughput" type="number" placeholder="" step="0.1" min="0" style="letter-spacing:0">
         </div>
         <div class="modal-actions">
           <button class="modal-cancel" onclick="closeModal()">Cancel</button>
@@ -1309,7 +1326,7 @@
           <div class="ew-meta" id="ew-meta">0 cuts · 00:00:00</div>
           <div class="modal-field" style="margin-bottom:0">
             <div class="modal-lbl">Cut Pieces Weight — one unit (kg) <span style="font-size:9px;color:var(--text-3);font-weight:400;letter-spacing:0;text-transform:none">(optional)</span></div>
-            <input class="modal-input" id="ew-wt" type="number" placeholder="leave blank to skip" step="0.1" min="0" style="font-size:14px;padding:7px 12px;letter-spacing:0">
+            <input class="modal-input" id="ew-wt" type="number" placeholder="" step="0.1" min="0" style="font-size:14px;padding:7px 12px;letter-spacing:0">
           </div>
         </div>
         <div class="modal-field" style="margin-bottom:20px">
@@ -1509,8 +1526,10 @@ let adminPinTimeout = null;
 const ADMIN_PIN = '1234';
 let pinEntry = '';
 let woStarted  = false; // true once startMachine() called on current WO
-let basketLog  = [];   // { num, cuts, sec, wt, ts }
+let basketLog  = [];   // { num, cuts, sec, wt, throughput, ts }
 let totalWt   = 0;    // sum of weights from logged baskets
+let rlThroughputTotal = 0;   // sum of throughput entries
+let rlThroughputCount = 0;   // number of entries with throughput
 let fBladeCuts = 7300;  // blade cut counters (simulated initial values)
 let rBladeCuts = 1400;
 let bcUnit = 'FRONT'; // selected unit in blade change modal
@@ -1848,11 +1867,14 @@ function openBasket() {
   showModal('modal-basket');
 }
 function confirmBasket() {
-  const wtVal = parseFloat(document.getElementById('mb-weight').value) || 0;
+  const wtVal  = parseFloat(document.getElementById('mb-weight').value)     || 0;
+  const tpVal  = parseFloat(document.getElementById('mb-throughput').value) || 0;
   const now = new Date();
   const ts = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  basketLog.push({ num: basketNum, cuts: basketCuts, sec: basketSec, wt: wtVal, ts });
+  basketLog.push({ num: basketNum, cuts: basketCuts, sec: basketSec, wt: wtVal, throughput: tpVal, ts });
   if (wtVal > 0) { totalWt += wtVal; updateProdActiveWt(); }
+  if (tpVal > 0) { rlThroughputTotal += tpVal; rlThroughputCount++; updateProdThroughput(); }
+  document.getElementById('mb-throughput').value = '';
   // Reset shared basket counters
   basketCuts = 0; basketSec = 0; basketNum++;
   fCuts = 0; rCuts = 0;
@@ -1875,6 +1897,7 @@ function renderLiveBasketList() {
       <span style="font-size:11px;color:var(--text-2)">${fmtSec(b.sec)}</span>
       <span class="brow-cuts">${b.cuts.toLocaleString()} cuts</span>
       ${b.wt > 0 ? `<span class="brow-wt">&nbsp;${b.wt.toFixed(1)} kg</span>` : ''}
+      ${b.throughput > 0 ? `<span style="color:var(--green);font-size:9px">&nbsp;${b.throughput.toFixed(1)} kg/h</span>` : ''}
       <span class="brow-ts">${b.ts}</span>
     </div>`).join('');
 }
@@ -1882,6 +1905,13 @@ function renderLiveBasketList() {
 function updateProdActiveWt() {
   const el = document.getElementById('p-total-weight');
   if (el) el.textContent = totalWt > 0 ? totalWt.toFixed(1) + ' kg' : '—';
+}
+function updateProdThroughput() {
+  const el = document.getElementById('p-throughput');
+  if (!el) return;
+  if (rlThroughputCount === 0) { el.textContent = '—'; return; }
+  const avg = rlThroughputTotal / rlThroughputCount;
+  el.textContent = avg.toFixed(1) + ' kg/h';
 }
 function openEndWork() {
   const woNum = document.getElementById('wo-num').textContent;
@@ -2193,7 +2223,8 @@ function confirmNewWO() {
   fLastCutMs = 0; rLastCutMs = 0;
   // Reset basket log & production screen
   woStarted = false;
-  basketLog = []; totalWt = 0;
+  basketLog = []; totalWt = 0; rlThroughputTotal = 0; rlThroughputCount = 0;
+  updateProdThroughput();
   renderLiveBasketList();
   updateProdActiveWt();
   const pWoTitle = document.getElementById('p-wo-title');
