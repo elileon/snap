@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=1024, height=600, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Snap-Cut HMI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -119,7 +119,7 @@
     html.light .modal          { box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
 
     html, body {
-      width: 1024px; height: 600px;
+      width: 100%; height: 100%;
       overflow: hidden;
       background: #030508;
       touch-action: none;
@@ -130,9 +130,15 @@
       user-select: none;
     }
 
+    /* HMI is always designed at 1024×600.
+       JS (below) sets --hmi-scale so it fills whatever screen it runs on.
+       On the real 7" 1024×600 panel: scale = 1.0, pixel-perfect.
+       In a dev browser window: scales down to fit. */
     .hmi-frame {
       width: 1024px; height: 600px;
       overflow: hidden;
+      transform-origin: top left;
+      transform: scale(var(--hmi-scale, 1));
     }
 
     .layout { display: flex; flex-direction: column; height: 100%; background: var(--bg); }
@@ -2390,6 +2396,27 @@ if (_addBtn) _addBtn.style.visibility = isAdmin() ? '' : 'hidden';
 document.documentElement.classList.add('light');
 document.getElementById('theme-btn').textContent = '🌙';
 document.getElementById('theme-btn').title = 'Switch to dark theme';
+</script>
+
+<script>
+/* ── Screen scale: fit the 1024×600 HMI into whatever viewport we have ── */
+(function fitHMI() {
+  const W = 1024, H = 600;
+  function applyScale() {
+    const sw = window.innerWidth;
+    const sh = window.innerHeight;
+    const scale = Math.min(sw / W, sh / H);
+    document.documentElement.style.setProperty('--hmi-scale', scale);
+    /* Centre vertically if there is leftover height (e.g. landscape dev window) */
+    const frame = document.querySelector('.hmi-frame');
+    if (frame) {
+      const topOffset = Math.max(0, Math.round((sh - H * scale) / 2));
+      frame.style.marginTop = topOffset + 'px';
+    }
+  }
+  applyScale();
+  window.addEventListener('resize', applyScale);
+})();
 </script>
 </body>
 </html>
