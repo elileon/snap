@@ -508,7 +508,7 @@
     /* Hamburger button in top bar */
     .nav-ham-btn {
       background: none; border: none; cursor: pointer;
-      padding: 0 14px; height: 100%; font-size: 20px;
+      padding: 0 12px 0 0; height: 100%; font-size: 20px;
       color: var(--text-3); transition: color 0.15s; flex-shrink: 0; line-height: 1;
     }
     .nav-ham-btn:hover { color: var(--text); }
@@ -584,11 +584,11 @@
       padding: 6px 8px; background: var(--elevated); border-radius: 5px;
       font-family: var(--font-mono); font-size: 13px; color: var(--text-2);
     }
-    .brow-num  { min-width: 32px; color: var(--text-3); font-size: 12px; flex-shrink: 0; }
-    .brow-time { min-width: 68px; color: var(--text-2); flex-shrink: 0; }
-    .brow-cuts { min-width: 72px; color: var(--text-3); text-align: right; flex-shrink: 0; }
-    .brow-wt   { min-width: 60px; color: var(--cyan); text-align: right; flex-shrink: 0; }
-    .brow-tp   { min-width: 60px; color: var(--green); text-align: right; font-size: 12px; flex-shrink: 0; }
+    .brow-num  { width: 32px; flex-shrink: 0; color: var(--text-3); font-size: 12px; }
+    .brow-time { width: 72px; flex-shrink: 0; color: var(--text-2); }
+    .brow-cuts { width: 56px; flex-shrink: 0; color: var(--text-3); text-align: right; }
+    .brow-wt   { width: 68px; flex-shrink: 0; color: var(--cyan); text-align: right; padding-right: 4px; }
+    .brow-tp   { width: 86px; flex-shrink: 0; color: var(--green); text-align: right; font-size: 12px; padding-right: 4px; }
     .brow-ts   { flex: 1; text-align: right; font-size: 11px; color: var(--text-3); }
 
     #prod-history { flex-direction: column; padding: 12px 16px; gap: 8px; }
@@ -1129,8 +1129,9 @@
                 <div class="kpi-sub">kg</div>
               </div>
               <div class="kpi" id="p-waste-kpi">
-                <div class="kpi-lbl">Waste %</div>
+                <div class="kpi-lbl">Cut Pieces %</div>
                 <div class="kpi-val" id="p-waste" style="color:var(--amber)">—</div>
+                <div class="kpi-sub">of RL total</div>
               </div>
             </div>
             <div style="border-top:1px solid var(--border);padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -1172,21 +1173,21 @@
           <div class="hist-scroll">
             <table id="hist-table">
               <thead>
-                <tr><th>WO ID</th><th>Material</th><th>Start</th><th>End</th><th>Duration</th><th>RL Tp (kg/h)</th><th>RL Total (kg)</th><th>CP Weight (kg)</th></tr>
+                <tr><th>WO ID</th><th>Material</th><th>Start</th><th>End</th><th>Duration</th><th>RL Tp (kg/h)</th><th>RL Total (kg)</th><th>CP Weight (kg)</th><th>CP %</th></tr>
               </thead>
               <tbody id="hist-tbody">
                 <tr onclick="openWODetail(this)" data-wo="WO-0041" data-mat="PE-LD Clean" data-start="29 Apr 06:12" data-end="29 Apr 10:45" data-rt="4h 33m" data-rl-tp="44.2" data-rl-total="201.5" data-cut-wt="97.4">
-                  <td class="td-wo">WO-0041</td><td class="td-mat">PE-LD Clean</td><td>29 Apr 06:12</td><td>29 Apr 10:45</td><td>4h 33m</td><td>44.2</td><td>201.5</td><td>97.4</td></tr>
+                  <td class="td-wo">WO-0041</td><td class="td-mat">PE-LD Clean</td><td>29 Apr 06:12</td><td>29 Apr 10:45</td><td>4h 33m</td><td>44.2</td><td>201.5</td><td>97.4</td><td class="warn">48.3%</td></tr>
                 <tr onclick="openWODetail(this)" data-wo="WO-0040" data-mat="PP Standard" data-start="29 Apr 11:00" data-end="29 Apr 14:22" data-rt="3h 22m" data-rl-tp="38.6" data-rl-total="130.2" data-cut-wt="72.1">
-                  <td class="td-wo">WO-0040</td><td class="td-mat">PP Standard</td><td>29 Apr 11:00</td><td>29 Apr 14:22</td><td>3h 22m</td><td>38.6</td><td>130.2</td><td>72.1</td></tr>
+                  <td class="td-wo">WO-0040</td><td class="td-mat">PP Standard</td><td>29 Apr 11:00</td><td>29 Apr 14:22</td><td>3h 22m</td><td>38.6</td><td>130.2</td><td>72.1</td><td class="warn">55.4%</td></tr>
                 <tr onclick="openWODetail(this)" data-wo="WO-0039" data-mat="EVA Foam" data-start="28 Apr 07:30" data-end="28 Apr 11:18" data-rt="3h 48m" data-rl-tp="—" data-rl-total="—" data-cut-wt="58.6">
-                  <td class="td-wo">WO-0039</td><td class="td-mat">EVA Foam</td><td>28 Apr 07:30</td><td>28 Apr 11:18</td><td>3h 48m</td><td>—</td><td>—</td><td>58.6</td></tr>
+                  <td class="td-wo">WO-0039</td><td class="td-mat">EVA Foam</td><td>28 Apr 07:30</td><td>28 Apr 11:18</td><td>3h 48m</td><td>—</td><td>—</td><td>58.6</td><td style="color:var(--text-3)">—</td></tr>
                 <tr onclick="openWODetail(this)" data-wo="WO-0038" data-mat="PE-LD w/ Organics" data-start="28 Apr 12:00" data-end="28 Apr 16:01" data-rt="4h 01m" data-rl-tp="31.8" data-rl-total="127.7" data-cut-wt="63.2">
-                  <td class="td-wo">WO-0038</td><td class="td-mat">PE-LD w/ Organics</td><td>28 Apr 12:00</td><td>28 Apr 16:01</td><td>4h 01m</td><td>31.8</td><td>127.7</td><td>63.2</td></tr>
+                  <td class="td-wo">WO-0038</td><td class="td-mat">PE-LD w/ Organics</td><td>28 Apr 12:00</td><td>28 Apr 16:01</td><td>4h 01m</td><td>31.8</td><td>127.7</td><td>63.2</td><td class="warn">49.5%</td></tr>
                 <tr onclick="openWODetail(this)" data-wo="WO-0037" data-mat="PE-LD Clean" data-start="27 Apr 05:58" data-end="27 Apr 11:00" data-rt="5h 02m" data-rl-tp="46.1" data-rl-total="232.2" data-cut-wt="108.1">
-                  <td class="td-wo">WO-0037</td><td class="td-mat">PE-LD Clean</td><td>27 Apr 05:58</td><td>27 Apr 11:00</td><td>5h 02m</td><td>46.1</td><td>232.2</td><td>108.1</td></tr>
+                  <td class="td-wo">WO-0037</td><td class="td-mat">PE-LD Clean</td><td>27 Apr 05:58</td><td>27 Apr 11:00</td><td>5h 02m</td><td>46.1</td><td>232.2</td><td>108.1</td><td class="warn">46.6%</td></tr>
                 <tr onclick="openWODetail(this)" data-wo="WO-0036" data-mat="PP Standard" data-start="27 Apr 11:30" data-end="27 Apr 15:35" data-rt="4h 05m" data-rl-tp="39.4" data-rl-total="161.1" data-cut-wt="86.7">
-                  <td class="td-wo">WO-0036</td><td class="td-mat">PP Standard</td><td>27 Apr 11:30</td><td>27 Apr 15:35</td><td>4h 05m</td><td>39.4</td><td>161.1</td><td>86.7</td></tr>
+                  <td class="td-wo">WO-0036</td><td class="td-mat">PP Standard</td><td>27 Apr 11:30</td><td>27 Apr 15:35</td><td>4h 05m</td><td>39.4</td><td>161.1</td><td>86.7</td><td class="warn">53.8%</td></tr>
               </tbody>
             </table>
           </div>
@@ -1980,10 +1981,15 @@ function updateProdComputed() {
   set('p-cp-tp',        cpTp > 0      ? cpTp.toFixed(1) + ' kg/h'   : '—');
   set('p-throughput',   rlAvg > 0     ? rlAvg.toFixed(1) + ' kg/h'  : '—');
   set('p-rl-total',     rlTotal > 0   ? rlTotal.toFixed(1) + ' kg'  : '—');
-  if (waste !== null) {
-    set('p-waste', waste.toFixed(1) + '%');
-  } else {
-    set('p-waste', '—');
+  const wasteEl = document.getElementById('p-waste');
+  if (wasteEl) {
+    if (waste !== null) {
+      wasteEl.textContent = waste.toFixed(1) + '%';
+      wasteEl.style.color = waste > 60 ? 'var(--red)' : waste > 45 ? 'var(--amber)' : 'var(--green)';
+    } else {
+      wasteEl.textContent = '—';
+      wasteEl.style.color = 'var(--text-3)';
+    }
   }
 }
 function openEndWork() {
