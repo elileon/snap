@@ -574,7 +574,7 @@
     .kpi-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
     .kpi { display: flex; flex-direction: column; gap: 3px; }
     .kpi-lbl { font-size: 13px; letter-spacing: 1px; color: var(--text-3); font-weight: 600; text-transform: uppercase; }
-    .kpi-val { font-family: var(--font-mono); font-size: 26px; color: var(--text); }
+    .kpi-val { font-family: var(--font-mono); font-size: 36px; line-height: 1.05; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .kpi-val.c { color: var(--cyan); }
     .kpi-sub { font-size: 13px; color: var(--text-3); }
 
@@ -1137,11 +1137,11 @@
             <div style="border-top:1px solid var(--border);padding-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
               <div class="kpi">
                 <div class="kpi-lbl">WO Runtime</div>
-                <div class="kpi-val" id="p-runtime" style="font-size:20px">—</div>
+                <div class="kpi-val" id="p-runtime">—</div>
               </div>
               <div class="kpi">
                 <div class="kpi-lbl">Basket #</div>
-                <div class="kpi-val" id="p-basket-num" style="font-size:20px">—</div>
+                <div class="kpi-val" id="p-basket-num">—</div>
                 <div class="kpi-sub" id="p-basket-sub">—</div>
               </div>
             </div>
@@ -1255,8 +1255,8 @@
         <div class="mcard">
           <div class="mcard-title">Run Hours</div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="kpi"><div class="kpi-lbl">Total</div><div class="kpi-val" style="font-size:16px">284 h</div></div>
-            <div class="kpi"><div class="kpi-lbl">Since Service</div><div class="kpi-val" style="font-size:16px">48 h</div></div>
+            <div class="kpi"><div class="kpi-lbl">Total</div><div class="kpi-val" style="font-size:22px">284 h</div></div>
+            <div class="kpi"><div class="kpi-lbl">Since Service</div><div class="kpi-val" style="font-size:22px">48 h</div></div>
           </div>
         </div>
         <div class="mcard" style="flex:1">
@@ -1941,8 +1941,8 @@ function renderLiveBasketList() {
       <span class="brow-num">#${b.num}</span>
       <span class="brow-time">${fmtSec(b.sec)}</span>
       <span class="brow-cuts">${b.cuts.toLocaleString()}</span>
-      <span class="brow-wt">${b.wt > 0 ? b.wt.toFixed(1) + ' kg' : '—'}</span>
-      <span class="brow-tp">${b.throughput > 0 ? b.throughput.toFixed(1) + ' kg/h' : '—'}</span>
+      <span class="brow-wt">${b.wt > 0 ? Math.round(b.wt) : '—'}</span>
+      <span class="brow-tp">${b.throughput > 0 ? Math.round(b.throughput) : '—'}</span>
       <span class="brow-ts">${b.ts}</span>
     </div>`).join('');
 }
@@ -1977,10 +1977,10 @@ function updateProdComputed() {
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  set('p-total-weight', totalCpWt > 0 ? totalCpWt.toFixed(1) + ' kg' : '—');
-  set('p-cp-tp',        cpTp > 0      ? cpTp.toFixed(1) + ' kg/h'   : '—');
-  set('p-throughput',   rlAvg > 0     ? rlAvg.toFixed(1) + ' kg/h'  : '—');
-  set('p-rl-total',     rlTotal > 0   ? rlTotal.toFixed(1) + ' kg'  : '—');
+  set('p-total-weight', totalCpWt > 0 ? Math.round(totalCpWt)      : '—');
+  set('p-cp-tp',        cpTp > 0      ? Math.round(cpTp)            : '—');
+  set('p-throughput',   rlAvg > 0     ? Math.round(rlAvg)           : '—');
+  set('p-rl-total',     rlTotal > 0   ? Math.round(rlTotal)         : '—');
   const wasteEl = document.getElementById('p-waste');
   if (wasteEl) {
     if (waste !== null) {
