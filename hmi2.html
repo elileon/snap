@@ -965,7 +965,7 @@
       <span class="state-label" id="state-label">STANDBY</span>
     </div>
     <!-- WO context: ID and material (no timer) -->
-    <div class="wo-info" id="wo-info">
+    <div class="wo-info" id="wo-info" style="display:none">
       <span class="wo-num" id="wo-num">—</span>
       <span class="wo-sep">·</span>
       <span class="wo-mat" id="wo-mat"></span>
@@ -1751,6 +1751,11 @@ function resumeCutTimer() {
 }
 
 // ── Machine state management ──────────────────────
+function updateWoInfo() {
+  const hasWO = document.getElementById('wo-num').textContent !== '—';
+  document.getElementById('wo-info').style.display = hasWO ? '' : 'none';
+}
+
 function applyState() {
   const pill     = document.getElementById('state-pill');
   const slabel   = document.getElementById('state-label');
@@ -2072,6 +2077,7 @@ function confirmEndWork() {
   document.getElementById('wo-num').textContent  = '—';
   document.getElementById('wo-mat').textContent  = '';
   document.getElementById('wo-time').textContent = '◷ 00:00:00';
+  updateWoInfo();
   const pWoTitle = document.getElementById('p-wo-title');
   if (pWoTitle) pWoTitle.textContent = 'No active work order';
   woStarted = false;
@@ -2335,6 +2341,7 @@ function confirmNewWO() {
   document.getElementById('wo-num').textContent = woNum;
   document.getElementById('wo-mat').textContent = m.name;
   document.getElementById('wo-time').textContent = '◷ 00:00:00';
+  updateWoInfo();
   cfgRate = m.rate;
   document.getElementById('shared-rate').textContent = cfgRate;
   const dsBadge = document.getElementById('ds-badge');
@@ -2510,6 +2517,7 @@ function demoNewWO() {
     if (fi) fi.classList.remove('show');
   });
   document.getElementById('wo-num').textContent = '—';
+  updateWoInfo();
   fCuts = 0; rCuts = 0; totalCuts = 0; woSec = 0; activeSec = 0;
   basketCuts = 0; basketSec = 0; basketNum = 1;
   const lbl = document.getElementById('basket-num-lbl');
